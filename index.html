@@ -130,6 +130,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
     display:flex;flex-direction:column;
     box-shadow:0 24px 64px rgba(0,0,0,.45);
     overflow:hidden;
+    transition:width .25s;
   }
   .hub-dm-header{
     display:flex;align-items:center;gap:14px;
@@ -1107,7 +1108,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
 
 <div class="container" id="main-container">
   <div class="name-panel" id="name-panel">
-    <div class="name-panel-header"><span class="name-panel-title">📝 Activity Name Suggestions — اقتراح اسم مختلف للنشاط</span></div>
+    <div class="name-panel-header"><span class="name-panel-title">📝 Activity Name — اسم النشاط</span></div>
     <div class="name-panel-body">
       <div class="current-name-row"><span class="current-name-label">Current Name</span><span class="current-name-value" id="current-name-display">—</span></div>
       <div class="suggestions-grid" id="suggestions-grid"></div>
@@ -1390,31 +1391,95 @@ function updateStats(){
 }
 
 function renderNamePanel(){
-  const actId=ACTIVITIES_DATA[currentActIdx].id;
-  const grid=document.getElementById('suggestions-grid'); if(!grid)return;
-  const rvDefs=[{key:'r1',name:'R1',cls:'r1',avatar:'R1'},{key:'r2',name:'R2',cls:'r2',avatar:'R2'},{key:'r3',name:'R3',cls:'r3',avatar:'R3'},{key:'r4',name:'R4',cls:'r4',avatar:'R4'},{key:'r5',name:'R5',cls:'r5',avatar:'R5'}];
-  grid.innerHTML='';
-  rvDefs.forEach(rv=>{
-    const isMe=currentReviewer===rv.key;
-    const val=(nameSuggestions[actId]&&nameSuggestions[actId][rv.key])||'';
-    const row=document.createElement('div'); row.className='suggestion-row';
-    const badge=document.createElement('div'); badge.className='sug-reviewer-badge';
-    badge.innerHTML=`<div class="sug-avatar ${rv.cls}">${rv.avatar}</div><div class="sug-name">${rv.name}</div>`;
-    row.appendChild(badge);
-    const iw=document.createElement('div'); iw.className='sug-input-wrap';
-    if(!isMe){
-      const ro=document.createElement('div'); ro.className='sug-readonly'+(val?` ${rv.cls}-filled`:' empty'); ro.textContent=val||'No suggestion yet'; iw.appendChild(ro);
-    } else {
-      const inp=document.createElement('input'); inp.type='text'; inp.className='sug-input'; inp.id='sug-input-'+rv.key;
-      inp.placeholder='اقترح اسماً مختلفاً للنشاط…'; inp.value=val; inp.maxLength=120;
-      inp.addEventListener('keydown',e=>{if(e.key==='Enter')saveNameSuggestion(rv.key);});
-      const saveBtn=document.createElement('button'); saveBtn.className='sug-save-btn'; saveBtn.id='sug-btn-'+rv.key;
-      saveBtn.textContent='Save'; saveBtn.onclick=()=>saveNameSuggestion(rv.key);
-      const note=document.createElement('div'); note.className='sug-saved-text'; note.id='sug-note-'+rv.key; note.textContent='✓ Saved';
-      iw.appendChild(inp); iw.appendChild(saveBtn); iw.appendChild(note);
+  const panel = document.getElementById('name-panel');
+  const grid  = document.getElementById('suggestions-grid');
+  const nameDisplay = document.getElementById('current-name-display');
+  if(!grid) return;
+
+  const actId = ACTIVITIES_DATA[currentActIdx].id;
+  const act   = ACTIVITIES_DATA[currentActIdx];
+  if(nameDisplay) nameDisplay.textContent = act.title_ar || '—';
+
+  // ── COMPARE VIEW: show all reviewers who made a suggestion ──────────────
+  if(currentReviewer === 'compare'){
+    if(panel) panel.style.display = '';
+    grid.innerHTML = '';
+
+    const rvDefs = [
+      {key:'r1',cls:'r1',label:'R1'},{key:'r2',cls:'r2',label:'R2'},
+      {key:'r3',cls:'r3',label:'R3'},{key:'r4',cls:'r4',label:'R4'},
+      {key:'r5',cls:'r5',label:'R5'}
+    ];
+    const actSugg = nameSuggestions[actId] || {};
+    const filled  = rvDefs.filter(rv => actSugg[rv.key] && actSugg[rv.key].trim());
+
+    if(filled.length === 0){
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-size:12px;color:#94A3B8;font-style:italic;padding:4px 0;direction:ltr';
+      empty.textContent = 'No name suggestions submitted yet.';
+      grid.appendChild(empty);
+      return;
     }
-    row.appendChild(iw); grid.appendChild(row);
-  });
+
+    filled.forEach(rv => {
+      const val = actSugg[rv.key];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#F8FAFC;border:1.5px solid #E5E7EB;margin-bottom:7px;direction:ltr';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'sug-avatar ' + rv.cls;
+      avatar.textContent = rv.label;
+
+      const name = document.createElement('span');
+      name.style.cssText = 'font-size:11px;font-weight:700;color:#6B7280;min-width:24px';
+      name.textContent = rv.label;
+
+      const sugg = document.createElement('span');
+      sugg.style.cssText = 'font-family:Amiri,serif;font-size:17px;direction:rtl;flex:1;text-align:right;color:#1A1A1A';
+      sugg.textContent = val;
+
+      row.appendChild(avatar);
+      row.appendChild(name);
+      row.appendChild(sugg);
+      grid.appendChild(row);
+    });
+    return;
+  }
+
+  // ── REVIEWER VIEW: hide panel if not logged in ──────────────────────────
+  if(!currentReviewer){
+    if(panel) panel.style.display = 'none';
+    return;
+  }
+  if(panel) panel.style.display = '';
+
+  grid.innerHTML = '';
+
+  const rv  = {key: currentReviewer, cls: currentReviewer};
+  const val = (nameSuggestions[actId] && nameSuggestions[actId][rv.key]) || '';
+
+  const label = document.createElement('div');
+  label.style.cssText = 'font-size:11px;color:#94A3B8;margin-bottom:8px;direction:ltr';
+  label.textContent = 'Suggest a different name for this activity — optional';
+  grid.appendChild(label);
+
+  const row = document.createElement('div');
+  row.className = 'sug-row';
+
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'sug-input'; inp.id = 'sug-input-' + rv.key;
+  inp.placeholder = 'اقترح اسماً مختلفاً للنشاط…'; inp.value = val; inp.maxLength = 120;
+  inp.addEventListener('keydown', e => { if(e.key === 'Enter') saveNameSuggestion(rv.key); });
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'sug-save-btn'; saveBtn.id = 'sug-btn-' + rv.key;
+  saveBtn.textContent = 'Save'; saveBtn.onclick = () => saveNameSuggestion(rv.key);
+
+  const note = document.createElement('div');
+  note.className = 'sug-saved-text'; note.id = 'sug-note-' + rv.key; note.textContent = '✓ Saved';
+
+  row.appendChild(inp); row.appendChild(saveBtn); row.appendChild(note);
+  grid.appendChild(row);
 }
 
 function saveNameSuggestion(rk){
@@ -1519,38 +1584,143 @@ function hubBack() {
 
 function openDesktopModal(section) {
   const modal = document.getElementById('hub-desktop-modal');
-  const body = document.getElementById('hub-dm-body');
+  const body  = document.getElementById('hub-dm-body');
   const title = document.getElementById('hub-dm-title');
   const dmBox = document.getElementById('hub-dm-box');
+
+  // Reset modal size
+  dmBox.style.cssText = '';
+  body.style.cssText  = '';
+
   if (section === 'log') {
     title.textContent = 'سجل بحث الأدلة';
-    // Clone the log screen content into the modal
-    const logEl = document.getElementById('hub-log-screen');
-    const wrapper = logEl ? logEl.querySelector('.log-view-wrapper') : null;
-    if (wrapper) {
-      body.innerHTML = '';
-      body.style.padding = '0';
-      const clone = wrapper.cloneNode(true);
-      clone.style.cssText = 'flex:1;overflow-y:auto;max-height:calc(85vh - 130px)';
-      body.appendChild(clone);
+
+    const LOG_DATA = [
+      {
+        num:'الأول', name:'الصلاة على وقتها', focus:'الالتزام بالوقت',
+        total:17, q:8, b:5, m:4,
+        focus_detail:'التركيز ليس على الصلاة بشكل عام — بل تحديداً على الالتزام بالوقت المحدد. الكلمة المحورية: كِتَابًا مَوْقُوتًا.',
+        quran:[['النساء 103','كِتَابًا مَوْقُوتًا — الأصل القرآني الصريح في تحديد أوقات الصلاة'],['الإسراء 78','تنص على أوقات الصلوات من الزوال إلى غسق الليل والفجر'],['هود 114','إقامة الصلاة طرفي النهار — ارتباط مباشر بالتوقيت'],['طه 130','التسبيح قبل طلوع الشمس وقبل غروبها — الأوقات المحددة'],['البقرة 238','حَافِظُوا — أمر بالحفاظ مما يستلزم الالتزام بالوقت'],['المؤمنون 9-10','المؤمنون الذين يُحَافِظُونَ على صلواتهم هم الوارثون'],['المعارج 34','شاهد مزدوج على أن المحافظة سمة راسخة'],['مريم 59','الوجه السلبي — الذين أَضَاعُوا الصَّلَاةَ سيلقون غيًّا']],
+        bukhari:[['527','الصلاة على وقتها أحبّ الأعمال إلى الله'],['521','الملائكة تجتمع في الفجر والعصر — الدقة في الوقت يرصدها الملأ الأعلى'],['563','فوات العصر كخسارة الأهل والمال'],['597','كان ﷺ يصلي العصر والشمس بيضاء مرتفعة — المبادرة في أول الوقت'],['626','من نام عن الصلاة فليصلّها إذا ذكر']],
+        muslim:[['85','الصلاة لوقتها أفضل الأعمال — يؤكد البخاري 527 بسند مختلف'],['632','من صلى البردين — مكافأة من يحافظ على الفجر والعصر تحديداً'],['657','رواية مسلم لحديث فوات العصر'],['684','الصلاة في أول وقتها أفضل الأعمال']]
+      },
+      {
+        num:'الثاني', name:'الصلاة في جماعة', focus:'الالتزام بالجماعة',
+        total:15, q:5, b:5, m:5,
+        focus_detail:'التركيز على الالتزام بأداء الصلاة في جماعة — الحكم وخطورة تركها والأجر المضاعف. كل دليل يشير إلى فعل الاجتماع للصلاة لا إلى الصلاة بشكل عام.',
+        quran:[['البقرة 43','وَارْكَعُوا مَعَ الرَّاكِعِينَ — أمر صريح بالصلاة مع الجماعة'],['النساء 102','صلاة الخوف — حتى في المعركة لم يُسقط ﷺ الجماعة'],['الجمعة 9','فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ — أمر بالإسراع إلى الجماعة'],['النور 36-37','رجال يعمرون المساجد للصلاة — صورة المؤمن الملتزم'],['الفتح 29','تَرَاهُمْ رُكَّعًا سُجَّدًا — الهوية البصرية للمؤمنين في جماعة']],
+        bukhari:[['645','أفضل بسبع وعشرين درجة — حديث الأجر الأساسي'],['657','التهديد بحرق البيوت — أشد حديث في خطورة ترك الجماعة'],['660','مضاعفة خمسة وعشرين مع شرح تفصيلي'],['676','سوّوا صفوفكم — هدي الإمام وجدية الفعل الجماعي'],['723','ترك الجماعة = ترك سنة الهدى = الضلال']],
+        muslim:[['649','العشاء في جماعة = نصف الليل، والفجر = الليل كله'],['650','خمسة وعشرون درجة — رواية مسلم'],['654','أثقل الصلوات على المنافقين — الجماعة علامة الإيمان'],['655','قصة الأعمى — رفض أقوى عذر ممكن'],['662','خمسة وعشرون في الجماعة وخمسون في الفلاة']]
+      },
+      {
+        num:'الثالث', name:'المشي للمسجد', focus:'المشي — فعل المشي ذاته',
+        total:15, q:4, b:6, m:5,
+        focus_detail:'التركيز على المشي — كل خطوة، ذهاباً وإياباً، في النور وفي الظلام. الأجر مرتبط بكل خطوة على حدة مما يجعل البُعد عن المسجد ميزة لا عائقاً.',
+        quran:[['التوبة 18','من يعمر مساجد الله هو المؤمن — المسجد وجهة تستحق المشي'],['الجن 18','المساجد لله — الوجهة المقدّسة تقدّس كل خطوة'],['النور 36','بيوت أذن الله أن ترفع — المساجد بيوت الله المرفوعة'],['الجمعة 9','فَاسْعَوْا — الإسراع الجسدي يستلزم المشي']],
+        bukhari:[['647','كل خطوة تحط خطيئة وكل خطوة ترفع درجة — الحديث الأساسي'],['477','من غدا وراح أعد الله له نزله من الجنة — الذهاب والإياب'],['660','كل خطوة درجة وحط خطيئة والملائكة تصلي أثناء الانتظار'],['662','من خرج إلى المسجد فهو في صلاة أثناء مشيه'],['656','الله يباهي الملائكة بمن مشى وينتظر'],['1186','إماطة الأذى عن الطريق مغفورة — كل فعل في طريق المسجد']],
+        muslim:[['666','كثرة الخطا إلى المساجد = الرباط — في منزلة الجهاد'],['1540','قصة أُبي بن كعب: رفض الانتقال قرب المسجد لأنه يريد تسجيل كل خطوة'],['649','المشي إلى مسجد قباء = أجر عمرة'],['669','المشّاؤون في الظلم لهم نور تام يوم القيامة'],['663','بكل خطوة حسنة ومحو سيئة — رواية مسلم']]
+      },
+      {
+        num:'الرابع', name:'السنن الرواتب', focus:'السنن الرواتب المربوطة بصلوات الفرض',
+        total:15, q:3, b:6, m:6,
+        focus_detail:'التركيز على السنن الرواتب المرتبطة بالصلوات الخمس تحديداً — لا على النوافل بشكل عام. 12 ركعة في اليوم = بيت في الجنة.',
+        quran:[['الإسراء 79','نَافِلَةً لَكَ — كلمة "نافلة" الجذر القرآني للنوافل'],['طه 130-132','الأمر بالصلاة في أطراف النهار + وَاصْطَبِرْ عَلَيْهَا — المداومة'],['الذاريات 17-18','كَانُوا قَلِيلًا مِنَ اللَّيْلِ مَا يَهْجَعُونَ — صفة المداومين']],
+        bukhari:[['1180','ركعتا الفجر خير من الدنيا وما فيها'],['1169','لم يكن على شيء من النوافل أشد تعاهداً من ركعتي الفجر'],['1176','ابن عمر حفظ عشر ركعات — الجرد الكامل للرواتب'],['1168','رحم الله من صلى قبل العصر أربعاً'],['1173','لم يدع أربعاً قبل الظهر وركعتين قبل الغداة'],['1099','حافظ ﷺ على الرواتب حتى في السفر']],
+        muslim:[['728','12 ركعة في اليوم والليلة → بيت في الجنة'],['729','4 قبل الظهر و4 بعدها → حرام على النار'],['730','عائشة: لم يدع 4 قبل الظهر وركعتين قبل الفجر'],['721','إذا فاتته يقضيها — أهمية الرواتب'],['725','ابن عمر: الجرد الكامل لرواتب الصلوات الخمس'],['724','عائشة تصف هديه ﷺ في البيت — التفصيل الدقيق']]
+      }
+    ];
+
+    function renderLogList() {
+      body.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="padding:10px 14px;background:#FFFDE7;border:1.5px solid #F9E57A;border-radius:12px;direction:rtl;text-align:right">
+            <div style="font-size:13px;font-weight:700;color:#7C5A00;margin-bottom:4px">الأنشطة المكتملة: 4 | إجمالي الأدلة: 62</div>
+            <div style="font-size:12px;color:#9A7200;line-height:1.7">يوثّق هذا السجل التركيز المفهوم من قائمة المشروع ومبررات اختيار كل دليل. اضغط على أي نشاط للتفاصيل.</div>
+          </div>
+          ${LOG_DATA.map((act,i) => `
+            <div onclick="renderLogDetail(${i})" style="padding:14px 16px;background:#fff;border-radius:12px;border:1.5px solid #E5E7EB;box-shadow:0 1px 6px rgba(0,0,0,.05);cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='#1B5E20';this.style.boxShadow='0 3px 14px rgba(27,94,32,.12)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='0 1px 6px rgba(0,0,0,.05)'">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                <div>
+                  <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#1B5E20;margin-bottom:3px">النشاط ${act.num}</div>
+                  <div style="font-family:Amiri,serif;font-size:20px;color:#1A1A1A;direction:rtl">${act.name}</div>
+                  <div style="margin-top:5px;background:#1B5E20;color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;display:inline-block">${act.focus}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+                  <div style="text-align:center">
+                    <div style="background:#1B5E20;color:#fff;border-radius:8px;padding:4px 12px;font-size:20px;font-weight:700;line-height:1">${act.total}<div style="font-size:9px;opacity:.8;font-weight:400">دليل</div></div>
+                    <div style="display:flex;gap:4px;margin-top:5px">
+                      <span style="background:#E8F5E9;color:#1B5E20;border:1px solid #A5D6A7;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700">ق ${act.q}</span>
+                      <span style="background:#E3F2FD;color:#0D47A1;border:1px solid #90CAF9;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700">ب ${act.b}</span>
+                      <span style="background:#F3E5F5;color:#4A148C;border:1px solid #CE93D8;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700">م ${act.m}</span>
+                    </div>
+                  </div>
+                  <div style="font-size:20px;color:#CBD5E1">›</div>
+                </div>
+              </div>
+            </div>`).join('')}
+          <div style="padding:12px 14px;background:#F8FAFC;border-radius:10px;border:1.5px dashed #CBD5E1;text-align:center;direction:rtl">
+            <div style="font-size:12px;color:#64748B;font-weight:700;margin-bottom:4px">⏳ الأنشطة المعلّقة — 10 أنشطة في انتظار البحث</div>
+            <div style="font-size:11px;color:#94A3B8;line-height:1.6">صلاة الوتر • صلاة الضحى • قيام الليل • قراءة القرآن • أذكار بعد الصلاة • أذكار الصباح • أذكار المساء • صيام الإثنين والخميس • الصدقة • الوالدين</div>
+          </div>
+        </div>`;
     }
+
+    window.renderLogDetail = function(i) {
+      const act = LOG_DATA[i];
+      const srcSection = (src, color, bgColor, borderColor, rows) => `
+        <div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="width:9px;height:9px;border-radius:50%;background:${color}"></div>
+            <span style="font-size:11px;font-weight:700;color:${color}">${src}</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="background:#F8FAFC">
+              <th style="padding:7px 10px;font-size:10px;font-weight:700;color:#94A3B8;text-align:right;border-bottom:2px solid #E5E7EB;width:110px">المرجع</th>
+              <th style="padding:7px 10px;font-size:10px;font-weight:700;color:#94A3B8;text-align:right;border-bottom:2px solid #E5E7EB">سبب الاختيار</th>
+            </tr></thead>
+            <tbody>${rows.map(([ref,reason]) => `
+              <tr style="border-bottom:1px solid #F0F0F0">
+                <td style="padding:8px 10px;font-family:Amiri,serif;font-size:14px;font-weight:700;color:${color};vertical-align:top;direction:rtl">${ref}</td>
+                <td style="padding:8px 10px;font-size:12px;line-height:1.7;direction:rtl;text-align:right">${reason}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+
+      body.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <button onclick="renderLogList()" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;border:1.5px solid #E5E7EB;background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:#374151;width:fit-content">‹ Back to all activities</button>
+          <div style="padding:14px 16px;background:#fff;border-radius:12px;border:1.5px solid #1B5E20;direction:rtl">
+            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#1B5E20;margin-bottom:4px">النشاط ${act.num}</div>
+            <div style="font-family:Amiri,serif;font-size:24px;color:#1A1A1A;margin-bottom:6px">${act.name}</div>
+            <div style="display:inline-block;background:#1B5E20;color:#fff;border-radius:6px;padding:4px 12px;font-size:12px;margin-bottom:10px">${act.focus}</div>
+            <div style="background:#FFFDE7;border:1px solid #F9E57A;border-radius:8px;padding:10px 12px;font-size:13px;color:#7C5A00;line-height:1.8">${act.focus_detail}</div>
+          </div>
+          <div style="padding:14px 16px;background:#fff;border-radius:12px;border:1.5px solid #E5E7EB">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#94A3B8;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #F0F0F0">مبررات اختيار الأدلة</div>
+            ${srcSection('القرآن الكريم','#1B5E20','#E8F5E9','#A5D6A7', act.quran)}
+            ${srcSection('صحيح البخاري','#0D47A1','#E3F2FD','#90CAF9', act.bukhari)}
+            ${srcSection('صحيح مسلم','#4A148C','#F3E5F5','#CE93D8', act.muslim)}
+          </div>
+        </div>`;
+    };
+
+    renderLogList();
   } else {
-    body.style.padding = '';
     const cfg = HUB_CONTENT[section];
     if (!cfg) return;
     title.textContent = cfg.title;
     body.innerHTML = cfg.render();
-    // Style coming-soon for desktop (white bg)
     if (section === 'stage2') {
       const coming = body.querySelector('.hub-coming');
-      if (coming) { coming.style.color='#374151'; }
+      if (coming) coming.style.color = '#374151';
     }
   }
-  // Sync status
+
   const dmSync = document.getElementById('hub-dm-sync');
   const syncEl = document.getElementById('login-sync');
   if (dmSync && syncEl) {
-    dmSync.className = syncEl.className;
+    dmSync.className   = syncEl.className;
     dmSync.textContent = syncEl.textContent;
   }
   modal.classList.add('open');
