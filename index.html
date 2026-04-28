@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACTIVITIES EVIDENCE REVIEW TOOL</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --quran-dark:#1B5E20;--quran-light:#E8F5E9;
+  --bukhari-dark:#0D47A1;--bukhari-light:#E3F2FD;
+  --muslim-dark:#4A148C;--muslim-light:#F3E5F5;
+  --r1:#0EA5E9;--r1-light:#E0F2FE;
+  --r2:#F59E0B;--r2-light:#FEF3C7;
+  --r3:#EC4899;--r3-light:#FCE7F3;
+  --r4:#8B5CF6;--r4-light:#EDE9FE;
+  --r5:#14B8A6;--r5-light:#CCFBF1;
+  --opt-a-bg:#FEE2E2;--opt-a-border:#FCA5A5;--opt-a-text:#B91C1C;
+  --opt-b-bg:#FEF3C7;--opt-b-border:#FCD34D;--opt-b-text:#92400E;
+  --opt-c-bg:#E0F2FE;--opt-c-border:#7DD3FC;--opt-c-text:#075985;
+  --opt-d-bg:#F3E8FF;--opt-d-border:#C084FC;--opt-d-text:#6B21A8;
+  --opt-e-bg:#DCFCE7;--opt-e-border:#86EFAC;--opt-e-text:#14532D;
+  --bg:#F4F4EF;--card:#FFFFFF;--text:#1A1A1A;--muted:#666;
+  --shadow:0 2px 14px rgba(0,0,0,0.07);--radius:14px;
+  --scale:1;
+  --fs-arabic:calc(18px * var(--scale));
+  --fs-english:calc(13px * var(--scale));
+  --fs-ref-ar:calc(13px * var(--scale));
+  --fs-ref-en:calc(10px * var(--scale));
+  --fs-narr-ar:calc(13px * var(--scale));
+  --fs-narr-en:calc(10px * var(--scale));
+  --fs-vopt:calc(12px * var(--scale));
+  --fs-sec-ar:calc(19px * var(--scale));
+}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+.loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1B5E20,#0D47A1,#4A148C);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
+.loading-screen.hidden{opacity:0;pointer-events:none}
+.loading-logo{font-family:'Amiri',serif;font-size:28px;color:#fff;margin-bottom:16px}
+.loading-spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+.loading-text{font-size:12px;color:rgba(255,255,255,.7);margin-top:14px;letter-spacing:1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.login-overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(160deg,#0a2a0a 0%,#0D2B5E 55%,#1a0533 100%);
+  display:none;align-items:center;justify-content:center;z-index:998;
+}
+.login-overlay.show{display:flex}
+
+/* ══ HUB WRAPPER — adapts to screen ══ */
+.hub-phone{
+  width:min(420px,100vw);
+  height:min(780px,100dvh);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  border-radius:clamp(0px,calc((100vw - 420px)*999),24px); /* rounded on desktop, edge-to-edge on mobile */
+  box-shadow:0 32px 80px rgba(0,0,0,.5);
+}
+
+/* ══ SLIDE ENGINE ══ */
+.hub-screens{position:relative;width:100%;height:100%;overflow:hidden}
+.hub-screen{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:flex;flex-direction:column;
+  transition:transform .36s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.hub-home{transform:translateX(0)}
+.hub-sub{transform:translateX(100%)}
+.hub-screens.show-sub .hub-home{transform:translateX(-100%)}
+.hub-screens.show-sub .hub-sub{transform:translateX(0)}
+
+/* ══ HOME SCREEN ══ */
+.hub-header{
+  padding:clamp(28px,6vh,52px) 24px 20px;
+  text-align:center;flex-shrink:0;
+}
+.hub-header h1{font-family:'Amiri',serif;font-size:clamp(28px,5vw,40px);color:#fff;line-height:1.1;margin-bottom:4px}
+.hub-header .sub{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase}
+.hub-status{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:12px;padding:5px 14px;border-radius:999px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.55);
+}
+.hub-status-dot{width:7px;height:7px;border-radius:50%;background:#94A3B8;flex-shrink:0;transition:background .3s}
+.hub-status-dot.on{background:#4ADE80;box-shadow:0 0 6px #4ADE80}
+.hub-status-dot.off{background:#F87171}
+
+.hub-cards{
+  flex:1;overflow-y:auto;
+  padding:0 16px clamp(16px,4vh,32px);
+  display:flex;flex-direction:column;gap:10px;
+}
+.hub-cards::-webkit-scrollbar{display:none}
+
+/* ══ MENU CARDS ══ */
+.hub-card{
+  border-radius:16px;border:1.5px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.07);
+  padding:16px 18px;cursor:pointer;
+  display:flex;align-items:center;gap:14px;
+  transition:transform .15s,background .15s;
+  position:relative;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.hub-card:hover{background:rgba(255,255,255,.13);transform:translateY(-1px)}
+.hub-card:active{transform:translateY(0);background:rgba(255,255,255,.17)}
+.hub-card-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.hub-card-text{flex:1;text-align:left;min-width:0}
+.hub-card-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px}
+.hub-card-sub{font-size:11px;color:rgba(255,255,255,.45);line-height:1.4}
+.hub-card-arrow{font-size:18px;color:rgba(255,255,255,.35);flex-shrink:0;transition:transform .2s}
+.hub-card:hover .hub-card-arrow{transform:translateX(3px)}
+.hub-card-badge{
+  position:absolute;top:10px;right:10px;
+  font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;
+}
+.hub-card.c-blue{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.12)}
+.hub-card.c-blue .hub-card-icon{background:rgba(56,189,248,.22);color:#38BDF8}
+.hub-card.c-blue .hub-card-badge{background:rgba(56,189,248,.25);color:#7DD3FC}
+.hub-card.c-blue:hover{background:rgba(56,189,248,.2)}
+.hub-card.c-gold{border-color:rgba(234,179,8,.35);background:rgba(234,179,8,.12)}
+.hub-card.c-gold .hub-card-icon{background:rgba(234,179,8,.22);color:#EAB308}
+.hub-card.c-gold .hub-card-badge{background:rgba(234,179,8,.25);color:#FDE047}
+.hub-card.c-gold:hover{background:rgba(234,179,8,.2)}
+.hub-card.c-grey{border-color:rgba(148,163,184,.22);background:rgba(148,163,184,.08)}
+.hub-card.c-grey .hub-card-icon{background:rgba(148,163,184,.18);color:#94A3B8}
+.hub-card.c-grey .hub-card-badge{background:rgba(148,163,184,.2);color:#94A3B8}
+.hub-card.c-grey:hover{background:rgba(148,163,184,.14)}
+.hub-card.c-red{border-color:rgba(239,68,68,.32);background:rgba(239,68,68,.1)}
+.hub-card.c-red .hub-card-icon{background:rgba(239,68,68,.2);color:#F87171}
+.hub-card.c-red .hub-card-badge{background:rgba(239,68,68,.2);color:#FCA5A5}
+.hub-card.c-red:hover{background:rgba(239,68,68,.18)}
+
+/* ══ SUB SCREEN ══ */
+.hub-sub{display:flex;flex-direction:column}
+.hub-sub-header{
+  display:flex;align-items:center;gap:12px;
+  padding:clamp(20px,5vh,44px) 18px 16px;
+  flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.hub-back-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;flex-shrink:0;color:#fff;
+  transition:background .15s;-webkit-tap-highlight-color:transparent;
+}
+.hub-back-btn:hover{background:rgba(255,255,255,.2)}
+.hub-back-btn:active{background:rgba(255,255,255,.3)}
+.hub-sub-title{font-family:'Amiri',serif;font-size:20px;color:#fff}
+.hub-sub-body{
+  flex:1;overflow-y:auto;
+  padding:14px 14px 10px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.hub-sub-body::-webkit-scrollbar{width:3px}
+.hub-sub-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:4px}
+.hub-sub-footer{
+  padding:10px 14px clamp(12px,3vh,20px);
+  flex-shrink:0;border-top:1px solid rgba(255,255,255,.08);
+}
+
+/* ══ REVIEWER BUTTONS ══ */
+.reviewer-btn{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 15px;border-radius:13px;border:1.5px solid;
+  font-family:'Lato',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;text-align:left;direction:ltr;
+  width:100%;-webkit-tap-highlight-color:transparent;
+  background:#fff;
+}
+.reviewer-btn .r-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all .15s}
+.reviewer-btn .r-info{display:flex;flex-direction:column;gap:1px}
+.reviewer-btn .r-name{font-size:13px;font-weight:700}
+.reviewer-btn .r-role{font-size:10px;opacity:.6;letter-spacing:.3px}
+.reviewer-btn.r1{border-color:var(--r1);color:var(--r1)}.reviewer-btn.r1 .r-avatar{background:var(--r1-light);color:var(--r1)}.reviewer-btn.r1:hover,.reviewer-btn.r1:active{background:var(--r1);color:#fff}.reviewer-btn.r1:hover .r-avatar,.reviewer-btn.r1:active .r-avatar{background:rgba(255,255,255,.25);color:#fff}
+.reviewer-btn.r2{border-color:var(--r2);color:var(--r2)}.reviewer-btn.r2 .r-avatar{background:var(--r2-light);color:var(--r2)}.reviewer-btn.r2:hover,.reviewer-btn.r2:active{background:var(--r2);color:#fff}.reviewer-btn.r2:hover .r-avatar,.reviewer-btn.r2:active .r-avatar{background:rgba(255,255,255,.25);color:#fff}
+.reviewer-btn.r3{border-color:var(--r3);color:var(--r3)}.reviewer-btn.r3 .r-avatar{background:var(--r3-light);color:var(--r3)}.reviewer-btn.r3:hover,.reviewer-btn.r3:active{background:var(--r3);color:#fff}.reviewer-btn.r3:hover .r-avatar,.reviewer-btn.r3:active .r-avatar{background:rgba(255,255,255,.25);color:#fff}
+.reviewer-btn.r4{border-color:var(--r4);color:var(--r4)}.reviewer-btn.r4 .r-avatar{background:var(--r4-light);color:var(--r4)}.reviewer-btn.r4:hover,.reviewer-btn.r4:active{background:var(--r4);color:#fff}.reviewer-btn.r4:hover .r-avatar,.reviewer-btn.r4:active .r-avatar{background:rgba(255,255,255,.25);color:#fff}
+.reviewer-btn.r5{border-color:var(--r5);color:var(--r5)}.reviewer-btn.r5 .r-avatar{background:var(--r5-light);color:var(--r5)}.reviewer-btn.r5:hover,.reviewer-btn.r5:active{background:var(--r5);color:#fff}.reviewer-btn.r5:hover .r-avatar,.reviewer-btn.r5:active .r-avatar{background:rgba(255,255,255,.25);color:#fff}
+.reviewer-btn.compare-btn{border-color:#6B7280;color:#6B7280}.reviewer-btn.compare-btn .r-avatar{background:#F3F4F6;color:#6B7280}.reviewer-btn.compare-btn:hover,.reviewer-btn.compare-btn:active{background:#6B7280;color:#fff}.reviewer-btn.compare-btn:hover .r-avatar,.reviewer-btn.compare-btn:active .r-avatar{background:rgba(255,255,255,.2);color:#fff}
+
+/* ══ STATUS / SYNC ══ */
+.login-sync{font-size:11px;padding:7px 14px;border-radius:8px;font-weight:700;text-align:center;border:1px solid transparent}
+.login-sync.online{background:rgba(74,222,128,.12);color:#4ADE80;border-color:rgba(74,222,128,.3)}
+.login-sync.offline{background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.2)}
+.login-note{font-size:10px;color:rgba(255,255,255,.25);text-align:center;margin-top:5px;line-height:1.5}
+
+/* ══ COMING SOON ══ */
+.hub-coming{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center}
+.hub-coming-icon{font-size:44px;margin-bottom:14px;opacity:.35}
+.hub-coming-title{font-family:'Amiri',serif;font-size:22px;color:rgba(255,255,255,.45);margin-bottom:8px}
+.hub-coming-sub{font-size:12px;color:rgba(255,255,255,.22);line-height:1.7}
+
+/* ══ ADMIN ENTRY BTN ══ */
+.admin-entry-btn{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 15px;border-radius:13px;
+  border:1.5px solid rgba(239,68,68,.45);
+  background:rgba(239,68,68,.08);color:#FCA5A5;
+  font-family:'Lato',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;text-align:left;direction:ltr;width:100%;
+  -webkit-tap-highlight-color:transparent;
+}
+.admin-entry-btn:hover{background:rgba(239,68,68,.22);border-color:rgba(239,68,68,.7)}
+.admin-entry-btn:active{background:rgba(239,68,68,.3)}
+.admin-entry-btn .ae-icon{width:36px;height:36px;border-radius:50%;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.admin-entry-btn .ae-label{display:flex;flex-direction:column;gap:1px}
+.admin-entry-btn .ae-name{font-size:13px;font-weight:700;color:#FCA5A5}
+.admin-entry-btn .ae-sub{font-size:10px;color:rgba(252,165,165,.55);letter-spacing:.3px}
+
+/* ══ RESPONSIVE: main review tool ══ */
+@media(max-width:600px){
+  .page-header{padding:14px 16px 12px}
+  .stat-bar{padding:6px 10px;gap:6px;flex-wrap:wrap}
+  .sp{padding:4px 8px;font-size:10px}
+  .toolbar{padding:8px 10px;gap:6px;flex-wrap:wrap}
+  .act-selector{font-size:12px;padding:6px 10px}
+  .tbtn{font-size:11px;padding:6px 10px}
+  .card-top{flex-direction:column;align-items:flex-start;gap:6px}
+  .card-right{flex-wrap:wrap}
+  .r-indicators{flex-wrap:wrap}
+  .vopt{font-size:12px;padding:8px 10px}
+  .sug-panel{padding:10px 12px}
+  .who-badge{font-size:11px}
+  .cv-row{flex-wrap:wrap;gap:4px}
+  .cv-name{min-width:40px}
+  .name-panel{padding:10px 12px}
+  .sug-row{flex-direction:column;align-items:stretch}
+  .sug-input{width:100%}
+}
+
+/* ══ RESPONSIVE: compare view ══ */
+@media(max-width:600px){
+  .modal{width:95%;padding:16px;max-height:88vh}
+  .etabs{gap:5px}
+  .etab{padding:5px 9px;font-size:10px}
+}
+
+
+/* ── PASSWORD PROMPT OVERLAY ── */
+.pwd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.pwd-overlay.show{display:flex}
+.pwd-box{background:#fff;border-radius:18px;padding:32px 28px;width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.pwd-box .pwd-icon{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;margin:0 auto 14px}
+.pwd-box h3{font-size:15px;font-weight:700;margin-bottom:4px;color:#1A1A1A}
+.pwd-box p{font-size:11px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.pwd-input{width:100%;padding:11px 14px;border-radius:10px;border:2px solid #E5E7EB;font-family:'Lato',sans-serif;font-size:14px;font-weight:700;text-align:center;outline:none;transition:border-color .2s;box-sizing:border-box;letter-spacing:1px}
+.pwd-input:focus{border-color:#0D47A1}
+.pwd-input.shake{animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pwd-error{font-size:11px;color:#DC2626;font-weight:700;margin-top:8px;min-height:16px}
+.pwd-actions{display:flex;gap:10px;margin-top:16px}
+.pwd-cancel{flex:1;padding:10px;border-radius:9px;border:1.5px solid #ddd;background:#fff;cursor:pointer;font-family:'Lato',sans-serif;font-size:12px;font-weight:700;color:#6B7280}
+.pwd-submit{flex:1;padding:10px;border-radius:9px;border:none;background:#0D47A1;color:#fff;cursor:pointer;font-family:'Lato',sans-serif;font-size:12px;font-weight:700}
+.pwd-submit:hover{background:#1565C0}
+
+/* ── ADMIN PANEL ── */
+.admin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.admin-overlay.show{display:flex}
+.admin-box{background:#fff;border-radius:20px;padding:28px;width:420px;box-shadow:0 24px 70px rgba(0,0,0,.45);direction:ltr;max-height:90vh;overflow-y:auto}
+.admin-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1.5px solid #F0F0F0}
+.admin-icon{width:42px;height:42px;background:linear-gradient(135deg,#DC2626,#991B1B);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.admin-title{font-size:15px;font-weight:700;color:#1A1A1A}
+.admin-subtitle{font-size:11px;color:#94A3B8;margin-top:2px}
+.admin-section{margin-bottom:18px}
+.admin-section-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94A3B8;margin-bottom:10px}
+.admin-reviewer-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;border:1.5px solid #E5E7EB;margin-bottom:8px;background:#FAFAFA}
+.admin-reviewer-info{display:flex;align-items:center;gap:10px}
+.admin-reviewer-dot{width:10px;height:10px;border-radius:50%}
+.admin-reviewer-name{font-size:12px;font-weight:700;color:#374151}
+.admin-reviewer-count{font-size:10px;color:#94A3B8}
+.admin-reset-btn{padding:6px 14px;border-radius:7px;border:none;background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;transition:all .2s}
+.admin-reset-btn:hover{background:#DC2626;color:#fff}
+.admin-reset-btn:disabled{opacity:.4;cursor:not-allowed}
+.admin-divider{height:1px;background:#F0F0F0;margin:16px 0}
+.admin-danger-zone{background:#FFF5F5;border:1.5px solid #FCA5A5;border-radius:12px;padding:14px}
+.admin-danger-title{font-size:11px;font-weight:700;color:#DC2626;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.admin-nuke-btn{width:100%;padding:11px;border-radius:10px;border:2px solid #DC2626;background:#fff;color:#DC2626;font-size:13px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;transition:all .2s}
+.admin-nuke-btn:hover{background:#DC2626;color:#fff}
+.admin-close-btn{width:100%;padding:10px;border-radius:10px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;margin-top:14px}
+.admin-success{font-size:11px;color:#16A34A;font-weight:700;text-align:center;margin-top:8px;min-height:16px}
+/* admin entry button inside compare login row */
+.admin-entry-btn{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:2px solid #DC2626;font-family:'Lato',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;text-align:left;direction:ltr;background:#FFF5F5;color:#DC2626;width:100%}
+.admin-entry-btn:hover{background:#DC2626;color:#fff}
+.admin-entry-btn .ae-icon{width:32px;height:32px;border-radius:8px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.admin-entry-btn:hover .ae-icon{background:rgba(255,255,255,.25)}
+.sug-name{font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+.sug-input-wrap{flex:1;position:relative}
+.sug-input{width:100%;padding:7px 40px 7px 10px;border-radius:9px;border:1.5px solid #E5E7EB;font-family:'Amiri',serif;font-size:16px;direction:rtl;text-align:right;color:var(--text);background:#fff;outline:none;transition:border-color .2s;box-sizing:border-box}
+.sug-input:focus{border-color:#0D47A1}.sug-input::placeholder{color:#bbb;font-size:14px}
+.sug-input:disabled{background:#F8FAFC;color:#aaa;cursor:not-allowed;border-color:#F0F0F0}
+.sug-save-btn{position:absolute;left:7px;top:50%;transform:translateY(-50%);padding:3px 7px;border-radius:6px;border:none;font-size:10px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;transition:all .2s;background:#E5E7EB;color:#6B7280}
+.sug-save-btn:hover{background:#0D47A1;color:#fff}.sug-save-btn.saved{background:#22C55E;color:#fff}
+.sug-saved-text{font-size:10px;color:var(--muted);margin-top:3px;direction:rtl;text-align:right;display:none}
+.sug-saved-text.show{display:block}
+.sug-readonly{flex:1;padding:7px 10px;border-radius:9px;border:1.5px solid #E5E7EB;background:#F8FAFC;font-family:'Amiri',serif;font-size:16px;direction:rtl;text-align:right;color:var(--text);min-height:36px}
+.sug-readonly.empty{color:#bbb;font-family:'Lato',sans-serif;font-size:12px;font-style:italic;direction:ltr;text-align:left}
+.sug-readonly.r1-filled{border-color:var(--r1);background:var(--r1-light)}
+.sug-readonly.r2-filled{border-color:var(--r2);background:var(--r2-light)}
+.sug-readonly.r3-filled{border-color:var(--r3);background:var(--r3-light)}
+.sug-readonly.r4-filled{border-color:var(--r4);background:var(--r4-light)}
+.sug-readonly.r5-filled{border-color:var(--r5);background:var(--r5-light)}
+.sec-head{display:flex;align-items:center;gap:12px;margin:28px 0 12px;direction:ltr}
+.sec-head:first-of-type{margin-top:0}
+.sec-badge{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.sec-badge.q{background:var(--quran-dark)}.sec-badge.b{background:var(--bukhari-dark)}.sec-badge.m{background:var(--muslim-dark)}
+.sec-titles{flex:1}
+.sec-ar{font-family:'Amiri',serif;font-size:var(--fs-sec-ar);direction:rtl}
+.sec-en{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.sec-line{flex:1;height:1px;background:linear-gradient(to right,#ddd,transparent)}
+.q .sec-ar{color:var(--quran-dark)}.b .sec-ar{color:var(--bukhari-dark)}.m .sec-ar{color:var(--muslim-dark)}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:11px;border:1.5px solid #E5E7EB;overflow:hidden;transition:all .3s}
+.card.unvoted{border-color:#E5E7EB;opacity:.82}
+.card.voted{border-color:#94A3B8;opacity:1;box-shadow:0 3px 16px rgba(0,0,0,.1)}
+.card.voted-use{border-color:#22C55E;box-shadow:0 3px 16px rgba(34,197,94,.18)}
+.card-top{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;direction:ltr;border-bottom:1px solid #F0F0F0;gap:8px;flex-wrap:wrap}
+.card-left{display:flex;align-items:center;gap:9px}
+.cnum{font-size:10px;font-weight:700;color:#bbb;letter-spacing:1px;white-space:nowrap}
+.cref-ar{font-family:'Amiri',serif;font-size:var(--fs-ref-ar);font-weight:700;direction:rtl}
+.cref-en{font-size:var(--fs-ref-en);color:var(--muted)}
+.card-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.r-indicators{display:flex;gap:4px}
+.r-ind{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;border:1.5px solid #E5E7EB;color:#ccc;background:#fff;transition:all .2s;cursor:default}
+.r-ind .rdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.r-ind.voted-r1{border-color:var(--r1);color:var(--r1);background:var(--r1-light)}
+.r-ind.voted-r2{border-color:var(--r2);color:var(--r2);background:var(--r2-light)}
+.r-ind.voted-r3{border-color:var(--r3);color:var(--r3);background:var(--r3-light)}
+.r-ind.voted-r4{border-color:var(--r4);color:var(--r4);background:var(--r4-light)}
+.r-ind.voted-r5{border-color:var(--r5);color:var(--r5);background:var(--r5-light)}
+.voted-label{display:none;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px}
+.card.voted-use .voted-label{display:inline-flex;align-items:center;gap:4px;background:#DCFCE7;color:#14532D;border:1px solid #86EFAC}
+.txt-blk{padding:11px 14px 10px}
+.txt-blk+.txt-blk{border-top:1px solid #F0F0F0;background:#FAFAFA}
+.tlbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#bbb;margin-bottom:5px;direction:ltr}
+.t-ar{font-family:'Amiri',serif;font-size:var(--fs-arabic);line-height:2.1;direction:rtl;text-align:right}
+.t-en{font-family:'Lato',sans-serif;font-size:var(--fs-english);line-height:1.8;direction:ltr;text-align:left;color:#444;font-style:italic}
+.narr{padding:7px 14px;background:#F8F8F8;border-top:1px solid #F0F0F0}
+.narr-ar{font-family:'Amiri',serif;font-size:var(--fs-narr-ar);direction:rtl;text-align:right;color:#555}
+.narr-en{font-size:var(--fs-narr-en);color:var(--muted);direction:ltr;font-style:italic;margin-top:2px}
+.vote-panel{padding:9px 13px 11px;border-top:1px solid #F0F0F0;direction:ltr}
+.vote-label-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.vote-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94A3B8}
+.vote-reset{font-size:10px;color:#94A3B8;cursor:pointer;text-decoration:underline;display:none}
+.vote-reset.show{display:inline}
+.vote-options{display:flex;flex-direction:column;gap:5px}
+.vopt{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:9px;border:1.5px solid;cursor:pointer;font-family:'Lato',sans-serif;font-size:var(--fs-vopt);font-weight:700;transition:all .2s;text-align:left;width:100%}
+.vopt .vopt-letter{font-size:10px;font-weight:700;width:15px;flex-shrink:0;opacity:.7}
+.vopt .vopt-text{flex:1}
+.vopt .vopt-check{margin-left:auto;font-size:13px;opacity:0;transition:opacity .2s}
+.vopt.collapsed{display:none}
+.vopt.selected{display:flex}.vopt.selected .vopt-check{opacity:1}
+.vopt:not(.selected):hover{filter:brightness(.94)}
+.vopt.opt-a{background:var(--opt-a-bg);border-color:var(--opt-a-border);color:var(--opt-a-text)}
+.vopt.opt-b{background:var(--opt-b-bg);border-color:var(--opt-b-border);color:var(--opt-b-text)}
+.vopt.opt-c{background:var(--opt-c-bg);border-color:var(--opt-c-border);color:var(--opt-c-text)}
+.vopt.opt-d{background:var(--opt-d-bg);border-color:var(--opt-d-border);color:var(--opt-d-text)}
+.vopt.opt-e{background:var(--opt-e-bg);border-color:var(--opt-e-border);color:var(--opt-e-text)}
+.compare-votes{display:flex;flex-direction:column;gap:6px}
+.cv-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;direction:ltr;padding:4px 2px}
+.cv-name{font-weight:700;min-width:28px;font-size:12px}
+.cv-name.r1n{color:var(--r1)}.cv-name.r2n{color:var(--r2)}.cv-name.r3n{color:var(--r3)}.cv-name.r4n{color:var(--r4)}.cv-name.r5n{color:var(--r5)}
+.cv-none{color:#bbb;font-style:italic;font-size:11px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1E1E1E;color:#fff;padding:9px 20px;border-radius:999px;font-size:11px;font-weight:700;z-index:9000;transition:transform .3s;white-space:nowrap;direction:ltr}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:680px;width:90%;max-height:80vh;overflow-y:auto;direction:ltr;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h2{font-size:15px;margin-bottom:3px}
+.modal .msub{font-size:10px;color:var(--muted);margin-bottom:12px}
+.etabs{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.etab{padding:6px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;color:#6B7280}
+.etab.active{background:#1B5E20;color:#fff;border-color:#1B5E20}
+.modal pre{background:#1E1E1E;color:#D4D4D4;padding:14px;border-radius:10px;font-size:10px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.mact{display:flex;gap:10px;margin-top:12px}
+.mclose{flex:1;padding:9px;border-radius:8px;border:1.5px solid #ddd;background:#fff;cursor:pointer;font-family:'Lato',sans-serif;font-size:12px;font-weight:700}
+.mcopy{flex:1;padding:9px;border-radius:8px;border:none;background:#1B5E20;color:#fff;cursor:pointer;font-family:'Lato',sans-serif;font-size:12px;font-weight:700}
+.mcopy:hover{background:#2E7D32}
+.empty-exp{text-align:center;padding:28px;color:var(--muted);font-size:12px}
+.log-view *, .log-view *::before, .log-view *::after {box-sizing:border-box;margin:0;padding:0}
+.log-view :root {
+  --gd:#1B5E20;--gm:#2E7D32;--gl:#E8F5E9;--gb:#A5D6A7;
+  --bd:#0D47A1;--bl:#E3F2FD;--bb:#90CAF9;
+  --pd:#4A148C;--pl:#F3E5F5;--pb:#CE93D8;
+  --gold:#B8860B;--goldl:#FFFDE7;--goldb:#F9E57A;
+  --bg:#F7F4EF;--card:#fff;--text:#1A1A1A;--muted:#6B7280;--bdr:#E5E7EB;
+  --shadow:0 2px 18px rgba(0,0,0,.07);
+}
+.log-view body {font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;padding-bottom:80px}
+.log-view .site-header {background:linear-gradient(135deg,var(--gd),var(--bd) 55%,var(--pd));padding:48px 40px 36px;text-align:center;position:relative;overflow:hidden}
+.log-view .site-header::before {content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E")}
+.log-view .site-header h1 {font-family:'Amiri',serif;font-size:36px;color:#fff;position:relative;margin-bottom:8px}
+.log-view .site-header .sub {font-size:14px;color:rgba(255,255,255,.65);position:relative}
+.log-view .header-meta {display:inline-flex;gap:24px;margin-top:18px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 22px;position:relative}
+.log-view .header-meta span {font-size:12px;color:rgba(255,255,255,.8)}
+.log-view .header-meta strong {color:#fff}
+.log-view .purpose-strip {background:var(--goldl);border-bottom:2px solid var(--goldb);padding:16px 40px;font-size:14px;color:#6B4800;display:flex;align-items:flex-start;gap:12px;line-height:1.8}
+.log-view .purpose-strip .icon {font-size:20px;flex-shrink:0;margin-top:2px}
+.log-view .container {max-width:980px;margin:0 auto;padding:36px 28px}
+.log-view .toc {background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1.5px solid var(--bdr);padding:22px 26px;margin-bottom:36px}
+.log-view .toc-title {font-family:'Amiri',serif;font-size:18px;font-weight:700;color:var(--gd);margin-bottom:14px;padding-bottom:10px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;gap:8px}
+.log-view .toc-grid {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.log-view .toc-item {display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:#F8FAFC;border:1px solid var(--bdr);text-decoration:none;color:var(--text);font-size:13px;font-weight:500;transition:all .18s}
+.log-view .toc-item:hover {background:var(--gl);border-color:var(--gb);color:var(--gd)}
+.log-view .toc-num {width:24px;height:24px;border-radius:6px;background:var(--gd);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.log-view .toc-item.p .toc-num {background:#94A3B8}
+.log-view .toc-item.p {opacity:.65}
+.log-view .activity-card {background:var(--card);border-radius:18px;box-shadow:var(--shadow);border:1.5px solid var(--bdr);margin-bottom:32px;overflow:hidden}
+.log-view .card-header {padding:20px 26px 16px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;background:linear-gradient(135deg,var(--gl),#fff 60%)}
+.log-view .act-number {font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gd);text-transform:uppercase;margin-bottom:4px}
+.log-view .act-title {font-family:'Amiri',serif;font-size:26px;color:var(--text);line-height:1.3}
+.log-view .act-emphasis {margin-top:8px;background:var(--gd);color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;display:inline-block;line-height:1.5}
+.log-view .count-badges {display:flex;flex-direction:column;gap:6px;flex-shrink:0;text-align:center;min-width:72px}
+.log-view .total-badge {background:var(--gd);color:#fff;border-radius:10px;padding:6px 14px;font-size:22px;font-weight:700;line-height:1}
+.log-view .total-badge small {display:block;font-size:9px;letter-spacing:.5px;opacity:.8;margin-top:2px;font-weight:400}
+.log-view .src-badges {display:flex;gap:5px}
+.log-view .src-badge {border-radius:7px;padding:4px 8px;font-size:10px;font-weight:700;text-align:center;line-height:1.4}
+.log-view .src-badge.q {background:var(--gl);color:var(--gd);border:1px solid var(--gb)}
+.log-view .src-badge.b {background:var(--bl);color:var(--bd);border:1px solid var(--bb)}
+.log-view .src-badge.m {background:var(--pl);color:var(--pd);border:1px solid var(--pb)}
+.log-view .section {padding:20px 26px;border-bottom:1px solid var(--bdr)}
+.log-view .section:last-child {border-bottom:none}
+.log-view .section-label {font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.log-view .section-label::after {content:'';flex:1;height:1px;background:var(--bdr)}
+.log-view .emphasis-box {background:var(--goldl);border:1.5px solid var(--goldb);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.9;color:#5C3A00}
+.log-view .emphasis-box ul {padding-right:18px;margin-top:6px}
+.log-view .emphasis-box li {margin-bottom:4px}
+.log-view .src-group {margin-bottom:20px}
+.log-view .src-group:last-child {margin-bottom:0}
+.log-view .src-group-title {display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.log-view .src-dot {width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.log-view .src-dot.q {background:var(--gd)}
+.log-view .src-dot.b {background:var(--bd)}
+.log-view .src-dot.m {background:var(--pd)}
+.log-view .src-label {font-size:12px;font-weight:700}
+.log-view .src-label.q {color:var(--gd)}
+.log-view .src-label.b {color:var(--bd)}
+.log-view .src-label.m {color:var(--pd)}
+.log-view .ev-table {width:100%;border-collapse:collapse}
+.log-view .ev-table thead tr {background:var(--bg)}
+.log-view .ev-table th {padding:8px 12px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-align:right;border-bottom:2px solid var(--bdr)}
+.log-view .ev-table th:first-child {width:130px}
+.log-view .ev-table td {padding:10px 12px;font-size:13px;line-height:1.75;border-bottom:1px solid var(--bdr);vertical-align:top}
+.log-view .ev-table tr:last-child td {border-bottom:none}
+.log-view .ev-table tr:hover td {background:#FAFAFA}
+.log-view .ref-cell {font-family:'Amiri',serif;font-size:15px;font-weight:700;white-space:nowrap}
+.log-view .ref-cell.q {color:var(--gd)}
+.log-view .ref-cell.b {color:var(--bd)}
+.log-view .ref-cell.m {color:var(--pd)}
+.log-view .pending-card {background:var(--card);border-radius:18px;box-shadow:var(--shadow);border:1.5px dashed #CBD5E1;overflow:hidden}
+.log-view .pending-header {padding:18px 26px;background:#F8FAFC;border-bottom:1.5px dashed #CBD5E1;font-family:'Amiri',serif;font-size:20px;color:#374151;display:flex;align-items:center;gap:10px}
+.log-view .pending-table {width:100%;border-collapse:collapse}
+.log-view .pending-table th {padding:9px 16px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-align:right;background:#F8FAFC;border-bottom:2px solid var(--bdr)}
+.log-view .pending-table td {padding:11px 16px;font-size:13px;line-height:1.7;border-bottom:1px solid var(--bdr);vertical-align:top}
+.log-view .pending-table tr:last-child td {border-bottom:none}
+.log-view .pnum {width:28px;height:28px;border-radius:7px;background:#E2E8F0;color:#64748B;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+
+/* ══ LOG SCREEN ══ */
+.hub-log{background:#F7F4EF;transform:translateX(100%)}
+.hub-screens.show-log .hub-home{transform:translateX(-100%)}
+.hub-screens.show-log .hub-log{transform:translateX(0)}
+.hub-log .hub-sub-header{
+  background:linear-gradient(135deg,#1B5E20,#0D47A1 55%,#4A148C);
+  border-bottom:none;flex-shrink:0;
+}
+.log-view-wrapper{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.log-view-wrapper::-webkit-scrollbar{width:4px}
+.log-view-wrapper::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+.log-view .site-header{padding:24px 20px 18px}
+.log-view .site-header h1{font-size:clamp(20px,5vw,34px)}
+.log-view .container{padding:16px 14px 40px;max-width:100%}
+.log-view .toc-grid{grid-template-columns:1fr 1fr}
+.log-view .purpose-strip{padding:12px 16px;font-size:13px}
+.log-view .ev-table th:first-child{width:100px}
+@media(max-width:480px){
+  .log-view .toc-grid{grid-template-columns:1fr}
+  .log-view .act-title{font-size:20px}
+  .log-view .card-header{flex-direction:column;align-items:flex-start;gap:10px}
+  .log-view .count-badges{flex-direction:row;align-items:center;gap:8px}
+  .log-view .src-badges{flex-direction:row}
+  .log-view .ev-table{font-size:12px}
+  .log-view .ev-table th,.log-view .ev-table td{padding:7px 8px}
+  .log-view .pending-table{font-size:12px}
+}
+
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading-screen">
+  <div class="loading-logo">مراجعة الأدلة</div>
+  <div class="loading-spinner"></div>
+  <div class="loading-text">CONNECTING TO FIREBASE…</div>
+</div>
+
+<div class="login-overlay" id="login-overlay">
+  <div class="hub-phone">
+    <div class="hub-screens" id="hub-screens">
+
+      <!-- ══ HOME ═══════════════════════════════════════════════════════ -->
+      <div class="hub-screen hub-home">
+        <div class="hub-header">
+          <h1>مراجعة الأدلة</h1>
+          <div class="sub">ACTIVITIES EVIDENCE REVIEW TOOL</div>
+          <div class="hub-status">
+            <span class="hub-status-dot" id="hub-dot"></span>
+            <span id="hub-status-lbl">Connecting…</span>
+          </div>
+        </div>
+        <div class="hub-cards">
+          <div class="hub-card c-blue" onclick="hubNav('stage1')">
+            <div class="hub-card-icon">📋</div>
+            <div class="hub-card-text">
+              <div class="hub-card-title">Review Stage 1</div>
+              <div class="hub-card-sub">Reviewers R1–R5 + Compare All</div>
+            </div>
+            <div class="hub-card-arrow">›</div>
+            <span class="hub-card-badge">ACTIVE</span>
+          </div>
+          <div class="hub-card c-gold" onclick="hubNav('log')">
+            <div class="hub-card-icon">📖</div>
+            <div class="hub-card-text">
+              <div class="hub-card-title">Evidences Research Log</div>
+              <div class="hub-card-sub">سجل بحث الأدلة والتركيز</div>
+            </div>
+            <div class="hub-card-arrow">›</div>
+            <span class="hub-card-badge">4 أنشطة</span>
+          </div>
+          <div class="hub-card c-grey" onclick="hubNav('stage2')">
+            <div class="hub-card-icon">🔒</div>
+            <div class="hub-card-text">
+              <div class="hub-card-title">Review Stage 2</div>
+              <div class="hub-card-sub">المرحلة الثانية من المراجعة</div>
+            </div>
+            <div class="hub-card-arrow">›</div>
+            <span class="hub-card-badge">قريباً</span>
+          </div>
+          <div class="hub-card c-red" onclick="hubNav('admin')">
+            <div class="hub-card-icon">🛡</div>
+            <div class="hub-card-text">
+              <div class="hub-card-title">Admin Panel</div>
+              <div class="hub-card-sub">Reset & Database Management</div>
+            </div>
+            <div class="hub-card-arrow">›</div>
+            <span class="hub-card-badge">PROTECTED</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SUB SCREEN ═════════════════════════════════════════════════ -->
+      <div class="hub-screen hub-sub" id="hub-sub-screen">
+        <div class="hub-sub-header">
+          <div class="hub-back-btn" onclick="hubBack()">‹</div>
+          <div class="hub-sub-title" id="hub-sub-title"></div>
+        </div>
+        <div class="hub-sub-body" id="hub-sub-body"></div>
+        <div class="hub-sub-footer">
+          <div id="login-sync" class="login-sync offline">⚡ Connecting to database…</div>
+          <div class="login-note">Votes saved to Firebase in real time.</div>
+        </div>
+      </div>
+
+
+      <!-- ══ LOG SCREEN ═══════════════════════════════════════════════════ -->
+      <div class="hub-screen hub-log" id="hub-log-screen">
+        <div class="hub-sub-header">
+          <div class="hub-back-btn" onclick="hubBack()">‹</div>
+          <div class="hub-sub-title" style="font-size:16px">سجل بحث الأدلة</div>
+        </div>
+        <div class="log-view-wrapper">
+          <div class="log-view">
+<div class="site-header">
+  <h1>سجل بحث الأدلة</h1>
+  <div class="sub">مشروع تطبيق الأنشطة الإسلامية — أداة مراجعة الأدلة</div>
+  <div class="header-meta">
+    <span>الأنشطة المكتملة: <strong>4</strong></span>
+    <span>إجمالي الأدلة: <strong>62</strong></span>
+    <span>الأنشطة المعلّقة: <strong>10</strong></span>
+  </div>
+</div>
+
+<div class="purpose-strip">
+  <span class="icon">📋</span>
+  <div><strong>غرض هذا السجل:</strong> يوثّق لكل نشاط مكتمل: التركيز المفهوم من قائمة المشروع، ومبررات اختيار كل دليل بعينه، وملاحظات حول ما تم استبعاده ولماذا. يُحدَّث بعد اعتماد كل نشاط جديد.</div>
+</div>
+
+<div class="container">
+
+<div class="toc">
+  <div class="toc-title">📑 فهرس الأنشطة</div>
+  <div class="toc-grid">
+    <a href="#act1" class="toc-item"><span class="toc-num">1</span>الصلاة على وقتها</a>
+    <a href="#act2" class="toc-item"><span class="toc-num">2</span>الصلاة في جماعة</a>
+    <a href="#act3" class="toc-item"><span class="toc-num">3</span>المشي للمسجد</a>
+    <a href="#act4" class="toc-item"><span class="toc-num">4</span>السنن الرواتب</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">5</span>صلاة الوتر</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">6</span>صلاة الضحى</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">7</span>قيام الليل</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">8</span>قراءة القرآن</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">9</span>أذكار بعد الصلاة</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">10</span>أذكار الصباح</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">11</span>أذكار المساء</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">12</span>صيام الإثنين والخميس</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">13</span>الصدقة</a>
+    <a href="#pending" class="toc-item p"><span class="toc-num">14</span>الوالدين</a>
+  </div>
+</div>
+
+<div class="activity-card" id="act1">
+  <div class="card-header">
+    <div>
+      <div class="act-number">النشاط الأول</div>
+      <div class="act-title">الصلاة على وقتها</div>
+      <div class="act-emphasis">التركيز: الالتزام بالوقت</div>
+    </div>
+    <div class="count-badges">
+      <div class="total-badge">17<small>دليل</small></div>
+      <div class="src-badges">
+        <div class="src-badge q">قرآن<br>8</div>
+        <div class="src-badge b">بخاري<br>5</div>
+        <div class="src-badge m">مسلم<br>4</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">التركيز المفهوم</div>
+    <div class="emphasis-box">التركيز ليس على الصلاة بشكل عام — بل تحديداً على <strong>الالتزام بالوقت المحدد</strong>. الكلمة المحورية هي <strong>"كِتَابًا مَوْقُوتًا"</strong> أي مفروضة في أوقات معيّنة. كل دليل مختار يُبرز أحد المحاور الآتية:<ul><li>وجوب أداء الصلاة ضمن وقتها المقرر</li><li>فضل أداء الصلاة في أول وقتها</li><li>عاقبة التأخير أو الفوات</li><li>هدي النبي ﷺ في المبادرة إلى الصلاة</li></ul></div>
+  </div>
+  <div class="section">
+    <div class="section-label">مبررات اختيار الأدلة</div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot q"></span><span class="src-label q">القرآن الكريم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell q">النساء 103</td><td>تحتوي على "كِتَابًا مَوْقُوتًا" — الأصل القرآني الصريح في تحديد أوقات الصلاة</td></tr>
+          <tr><td class="ref-cell q">الإسراء 78</td><td>تنص صراحةً على أوقات الصلوات من الزوال إلى غسق الليل والفجر</td></tr>
+          <tr><td class="ref-cell q">هود 114</td><td>الأمر بإقامة الصلاة طرفي النهار — ارتباط مباشر بالتوقيت</td></tr>
+          <tr><td class="ref-cell q">طه 130</td><td>الأمر بالتسبيح قبل طلوع الشمس وقبل غروبها — الأوقات المحددة</td></tr>
+          <tr><td class="ref-cell q">البقرة 238</td><td>"حَافِظُوا" — أمر بالحفاظ على الصلوات مما يستلزم الالتزام بالوقت</td></tr>
+          <tr><td class="ref-cell q">المؤمنون 9-10</td><td>المؤمنون الذين يُحَافِظُونَ على صلواتهم هم الوارثون — سمة المؤمن الحق</td></tr>
+          <tr><td class="ref-cell q">المعارج 34</td><td>تؤكد آية المؤمنون — شاهد مزدوج على أن المحافظة سمة راسخة</td></tr>
+          <tr><td class="ref-cell q">مريم 59</td><td>الوجه السلبي — الذين أَضَاعُوا الصَّلَاةَ سيلقون غيًّا</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot b"></span><span class="src-label b">صحيح البخاري</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell b">527</td><td>الأكثر مباشرة: الصلاة على وقتها أحبّ الأعمال إلى الله</td></tr>
+          <tr><td class="ref-cell b">521</td><td>الملائكة تجتمع في الفجر والعصر تحديداً — الدقة في الوقت يرصدها الملأ الأعلى</td></tr>
+          <tr><td class="ref-cell b">563</td><td>فوات العصر كخسارة الأهل والمال — خطورة فوات وقت الصلاة</td></tr>
+          <tr><td class="ref-cell b">597</td><td>كان ﷺ يصلي العصر والشمس بيضاء مرتفعة — المبادرة في أول الوقت</td></tr>
+          <tr><td class="ref-cell b">626</td><td>من نام عن الصلاة فليصلّها إذا ذكر — الوقت هو المرجع حتى مع النسيان</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot m"></span><span class="src-label m">صحيح مسلم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell m">85</td><td>يؤكد البخاري 527 بسند مختلف — الصلاة لوقتها أفضل الأعمال</td></tr>
+          <tr><td class="ref-cell m">632</td><td>من صلى البردين — مكافأة من يحافظ على الفجر والعصر تحديداً</td></tr>
+          <tr><td class="ref-cell m">657</td><td>رواية مسلم لحديث فوات العصر — لاستيفاء الروايات</td></tr>
+          <tr><td class="ref-cell m">684</td><td>الصلاة في أول وقتها أفضل الأعمال — التصريح الصريح بفضل أول الوقت</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="activity-card" id="act2">
+  <div class="card-header">
+    <div>
+      <div class="act-number">النشاط الثاني</div>
+      <div class="act-title">الصلاة في جماعة</div>
+      <div class="act-emphasis">التركيز: الالتزام بالجماعة</div>
+    </div>
+    <div class="count-badges">
+      <div class="total-badge">15<small>دليل</small></div>
+      <div class="src-badges">
+        <div class="src-badge q">قرآن<br>5</div>
+        <div class="src-badge b">بخاري<br>5</div>
+        <div class="src-badge m">مسلم<br>5</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">التركيز المفهوم</div>
+    <div class="emphasis-box">التركيز على <strong>الالتزام بأداء الصلاة في جماعة</strong> — الحكم، وخطورة تركها، والأجر المضاعف، والأثر الاجتماعي والروحي. كل دليل يشير إلى فعل الاجتماع للصلاة، لا إلى الصلاة بشكل عام.</div>
+  </div>
+  <div class="section">
+    <div class="section-label">مبررات اختيار الأدلة</div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot q"></span><span class="src-label q">القرآن الكريم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell q">البقرة 43</td><td>"وَارْكَعُوا مَعَ الرَّاكِعِينَ" — أمر صريح بالصلاة مع الجماعة</td></tr>
+          <tr><td class="ref-cell q">النساء 102</td><td>صلاة الخوف — حتى في المعركة لم يُسقط ﷺ الجماعة؛ دليل على عدم تركها بأي حال</td></tr>
+          <tr><td class="ref-cell q">الجمعة 9</td><td>"فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ" — أمر بالإسراع إلى الصلاة الجماعية</td></tr>
+          <tr><td class="ref-cell q">النور 36-37</td><td>رجال يعمرون المساجد للصلاة — صورة المؤمن الملتزم بالجماعة</td></tr>
+          <tr><td class="ref-cell q">الفتح 29</td><td>"تَرَاهُمْ رُكَّعًا سُجَّدًا" — الصحابة كجماعة؛ الهوية البصرية للمؤمنين يصلون معاً</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot b"></span><span class="src-label b">صحيح البخاري</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell b">645</td><td>أفضل بسبع وعشرين درجة — حديث الأجر الأساسي للجماعة</td></tr>
+          <tr><td class="ref-cell b">657</td><td>التهديد بحرق البيوت — أشد حديث في خطورة ترك الجماعة</td></tr>
+          <tr><td class="ref-cell b">660</td><td>مضاعفة خمسة وعشرين مع شرح تفصيلي لكل خطوة من البيت حتى المسجد</td></tr>
+          <tr><td class="ref-cell b">676</td><td>"سوّوا صفوفكم" — هدي الإمام في إدارة الجماعة وجدية الفعل الجماعي</td></tr>
+          <tr><td class="ref-cell b">723</td><td>ابن مسعود: ترك الجماعة = ترك سنة الهدى = الضلال — الحكم والعاقبة</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot m"></span><span class="src-label m">صحيح مسلم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell m">649</td><td>العشاء في جماعة = نصف الليل، والفجر = الليل كله — أجر أثقل صلاتين على المنافقين</td></tr>
+          <tr><td class="ref-cell m">650</td><td>خمسة وعشرون درجة — رواية مسلم بصياغة تضيف مقارنة بالسوق</td></tr>
+          <tr><td class="ref-cell m">654</td><td>أثقل الصلوات على المنافقين — الجماعة علامة فارقة للإيمان الحقيقي</td></tr>
+          <tr><td class="ref-cell m">655</td><td>قصة الأعمى — ﷺ رفض أقوى عذر ممكن؛ دليل قاطع على قرب وجوب الجماعة</td></tr>
+          <tr><td class="ref-cell m">662</td><td>خمسة وعشرون في الجماعة وخمسون في الفلاة — الجماعة هي المعيار الأساسي</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="activity-card" id="act3">
+  <div class="card-header">
+    <div>
+      <div class="act-number">النشاط الثالث</div>
+      <div class="act-title">المشي للمسجد</div>
+      <div class="act-emphasis">التركيز: المشي — فعل المشي ذاته</div>
+    </div>
+    <div class="count-badges">
+      <div class="total-badge">15<small>دليل</small></div>
+      <div class="src-badges">
+        <div class="src-badge q">قرآن<br>4</div>
+        <div class="src-badge b">بخاري<br>6</div>
+        <div class="src-badge m">مسلم<br>5</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">التركيز المفهوم</div>
+    <div class="emphasis-box">التركيز تحديداً على <strong>المشي</strong> — كل خطوة، ذهاباً وإياباً، في النور وفي الظلام، من قريب ومن بعيد. الأجر مرتبط بكل خطوة على حدة، مما يجعل البُعد عن المسجد <strong>ميزة لا عائقاً</strong>. المحور الأساسي هو الفعل الجسدي للمشي إلى المسجد، لا الصلاة فيه.</div>
+  </div>
+  <div class="section">
+    <div class="section-label">مبررات اختيار الأدلة</div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot q"></span><span class="src-label q">القرآن الكريم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell q">التوبة 18</td><td>من يعمر مساجد الله هو المؤمن — يُرسي قيمة المسجد وجهةً تستحق المشي إليها</td></tr>
+          <tr><td class="ref-cell q">الجن 18</td><td>المساجد لله — الوجهة المقدّسة تقدّس كل خطوة في طريقها</td></tr>
+          <tr><td class="ref-cell q">النور 36</td><td>بيوت أذن الله أن ترفع — وصف المساجد بأنها بيوت الله المرفوعة القدر</td></tr>
+          <tr><td class="ref-cell q">الجمعة 9</td><td>"فَاسْعَوْا" — الإسراع الجسدي إلى ذكر الله يستلزم المشي</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot b"></span><span class="src-label b">صحيح البخاري</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell b">647</td><td>الحديث الأساسي: كل خطوة تحط خطيئة وكل خطوة ترفع درجة</td></tr>
+          <tr><td class="ref-cell b">477</td><td>من غدا وراح أعد الله له نزله من الجنة — الذهاب والإياب كلاهما يُحتسبان</td></tr>
+          <tr><td class="ref-cell b">660</td><td>كل خطوة = درجة + حط خطيئة + الملائكة تصلي عليه أثناء انتظاره — الأجر الشامل</td></tr>
+          <tr><td class="ref-cell b">662</td><td>من خرج إلى المسجد فهو في صلاة أثناء مشيه — المشي نفسه عبادة</td></tr>
+          <tr><td class="ref-cell b">656</td><td>الله يباهي الملائكة بمن مشى وينتظر — الماشون مُكرَّمون قبل الصلاة</td></tr>
+          <tr><td class="ref-cell b">1186</td><td>إماطة الأذى عن الطريق مغفورة — كل فعل صالح في طريق المسجد محتسَب</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot m"></span><span class="src-label m">صحيح مسلم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell m">666</td><td>كثرة الخطا إلى المساجد = الرباط — المشي الكثير في منزلة الجهاد في سبيل الله</td></tr>
+          <tr><td class="ref-cell m">1540</td><td>قصة أُبي بن كعب: سكن أبعد الناس عن المسجد ورفض الانتقال لأنه يريد تسجيل كل خطوة. أقرّه ﷺ — أقوى دليل على قيمة المسافة المقطوعة</td></tr>
+          <tr><td class="ref-cell m">649</td><td>المشي إلى مسجد قباء = أجر عمرة — المشي يبلغ أجر الحج والعمرة</td></tr>
+          <tr><td class="ref-cell m">669</td><td>المشّاؤون في الظُّلَم لهم نور تام يوم القيامة — فضل خاص للماشين في الفجر والعشاء</td></tr>
+          <tr><td class="ref-cell m">663</td><td>بكل خطوة حسنة ومحو سيئة — رواية مسلم بصياغة مكمّلة</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="activity-card" id="act4">
+  <div class="card-header">
+    <div>
+      <div class="act-number">النشاط الرابع</div>
+      <div class="act-title">السنن الرواتب</div>
+      <div class="act-emphasis">التركيز: صلاة السنن الرواتب المربوطة بصلوات الفرض</div>
+    </div>
+    <div class="count-badges">
+      <div class="total-badge">15<small>دليل</small></div>
+      <div class="src-badges">
+        <div class="src-badge q">قرآن<br>3</div>
+        <div class="src-badge b">بخاري<br>6</div>
+        <div class="src-badge m">مسلم<br>6</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label">التركيز المفهوم</div>
+    <div class="emphasis-box">التركيز على <strong>السنن الرواتب المرتبطة بالصلوات الخمس تحديداً</strong> — لا على النوافل بشكل عام. وهي:<ul><li>ركعتان قبل الفجر (آكد الرواتب جميعاً)</li><li>أربع أو ركعتان قبل الظهر، وركعتان بعده</li><li>ركعتان بعد المغرب</li><li>ركعتان بعد العشاء</li></ul>المجموع = <strong>12 ركعة</strong> → بيت في الجنة. المحاور الرئيسية: مداومة النبي ﷺ عليها، والأعداد المحددة، والحماية من النار.</div>
+  </div>
+  <div class="section">
+    <div class="section-label">مبررات اختيار الأدلة</div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot q"></span><span class="src-label q">القرآن الكريم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell q">الإسراء 79</td><td>"نَافِلَةً لَكَ" — كلمة "نافلة" هي الجذر القرآني للنوافل؛ تُرسي فضلها</td></tr>
+          <tr><td class="ref-cell q">طه 130-132</td><td>الأمر بالصلاة في أطراف النهار + "وَاصْطَبِرْ عَلَيْهَا" — الصبر والمداومة سمة الرواتب</td></tr>
+          <tr><td class="ref-cell q">الذاريات 17-18</td><td>"كَانُوا قَلِيلًا مِنَ اللَّيْلِ مَا يَهْجَعُونَ" — صفة المداومين على النوافل</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot b"></span><span class="src-label b">صحيح البخاري</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell b">1180</td><td>ركعتا الفجر خير من الدنيا وما فيها — أعظم جائزة لأي راتبة على الإطلاق</td></tr>
+          <tr><td class="ref-cell b">1169</td><td>لم يكن على شيء من النوافل أشد تعاهداً من ركعتي الفجر — قمة الرواتب</td></tr>
+          <tr><td class="ref-cell b">1176</td><td>ابن عمر حفظ عشر ركعات — الجرد التفصيلي الكامل للرواتب</td></tr>
+          <tr><td class="ref-cell b">1168</td><td>"رحم الله من صلى قبل العصر أربعاً" — دعاء النبي ﷺ لهذه الراتبة تحديداً</td></tr>
+          <tr><td class="ref-cell b">1173</td><td>لم يدع أربعاً قبل الظهر وركعتين قبل الغداة — أبرز الرواتب المداوَم عليها</td></tr>
+          <tr><td class="ref-cell b">1099</td><td>حافظ ﷺ على الرواتب حتى في السفر — دليل على أنها لا تُترك بسهولة</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="src-group">
+      <div class="src-group-title"><span class="src-dot m"></span><span class="src-label m">صحيح مسلم</span></div>
+      <table class="ev-table">
+        <thead><tr><th>المرجع</th><th>سبب الاختيار</th></tr></thead>
+        <tbody>
+          <tr><td class="ref-cell m">728</td><td>12 ركعة في اليوم والليلة → بيت في الجنة — الأجر الشامل لمجموع الرواتب</td></tr>
+          <tr><td class="ref-cell m">729</td><td>4 قبل الظهر و4 بعدها → حرام على النار — رواتب بعينها تمنح حماية بعينها</td></tr>
+          <tr><td class="ref-cell m">730</td><td>عائشة: لم يدع 4 قبل الظهر وركعتين قبل الفجر — شهادة قوية من أقرب الناس إليه ﷺ</td></tr>
+          <tr><td class="ref-cell m">721</td><td>إذا فاتته يقضيها — يقضي الرواتب مما يدل على أهميتها البالغة</td></tr>
+          <tr><td class="ref-cell m">725</td><td>ابن عمر: الجرد الكامل لرواتب الصلوات الخمس — رواية مسلم المفصّلة</td></tr>
+          <tr><td class="ref-cell m">724</td><td>عائشة تصف هديه ﷺ في البيت — تفصيل دقيق لممارسته للرواتب في الحياة اليومية</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="pending-card" id="pending">
+  <div class="pending-header">⏳ الأنشطة المعلّقة — في انتظار البحث</div>
+  <table class="pending-table">
+    <thead><tr><th style="width:60px">#</th><th>النشاط</th><th>التركيز المطلوب</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pnum">5</span></td><td>صلاة الوتر</td><td>سنة مؤكدة، وقتها من بعد العشاء حتى طلوع الفجر، وأقلها ركعة واحدة</td></tr>
+      <tr><td><span class="pnum">6</span></td><td>صلاة الضحى</td><td>سنة مؤكدة، ركعتان إلى ثماني ركعات، من ارتفاع الشمس حتى قبيل الظهر</td></tr>
+      <tr><td><span class="pnum">7</span></td><td>قيام الليل</td><td>بعد العشاء حتى الفجر، أفضله الثلث الأخير، مثنى مثنى، يختم بالوتر</td></tr>
+      <tr><td><span class="pnum">8</span></td><td>قراءة القرآن</td><td>هدي النبي ﷺ + تخصيص وقت للقراءة + الأجر + الكمية</td></tr>
+      <tr><td><span class="pnum">9</span></td><td>أذكار بعد الصلاة</td><td>أذكار ما بعد الصلاة المفروضة، سنة مؤكدة عن النبي ﷺ</td></tr>
+      <tr><td><span class="pnum">10</span></td><td>أذكار الصباح</td><td>الأذكار المتعلّقة بالصباح</td></tr>
+      <tr><td><span class="pnum">11</span></td><td>أذكار المساء</td><td>الأذكار المتعلّقة بالمساء</td></tr>
+      <tr><td><span class="pnum">12</span></td><td>صيام الإثنين والخميس</td><td>صيام التطوع مع تركيز على الإثنين والخميس تحديداً</td></tr>
+      <tr><td><span class="pnum">13</span></td><td>الصدقة</td><td>كل ما ينفقه المرء طوعاً من مال أو طعام أو غيره ابتغاء مرضات الله</td></tr>
+      <tr><td><span class="pnum">14</span></td><td>الوالدين</td><td>بر الوالدين — أقصى درجات الإحسان والطاعة للأب والأم</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN OVERLAY -->
+<div class="admin-overlay" id="admin-overlay">
+  <div class="admin-box">
+    <div class="admin-header">
+      <div class="admin-icon">🛡</div>
+      <div>
+        <div class="admin-title">Admin Panel</div>
+        <div class="admin-subtitle">Database Management & Reset Controls</div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-label">Reset Individual Reviewer</div>
+      <div id="admin-reviewer-rows"><!-- rendered by JS --></div>
+    </div>
+
+    <div class="admin-divider"></div>
+
+    <div class="admin-danger-zone">
+      <div class="admin-danger-title">⚠ Danger Zone</div>
+      <button class="admin-nuke-btn" onclick="adminResetAll()">🗑 Reset ALL Votes & Suggestions — Full Database Wipe</button>
+    </div>
+
+    <div class="admin-success" id="admin-success-msg"></div>
+    <button class="admin-close-btn" onclick="closeAdmin()">Close Admin Panel</button>
+  </div>
+</div>
+
+<!-- ADMIN PASSWORD PROMPT -->
+<div class="pwd-overlay" id="admin-pwd-overlay">
+  <div class="pwd-box">
+    <div class="pwd-icon" style="background:linear-gradient(135deg,#DC2626,#991B1B)">🛡</div>
+    <h3>Admin Access</h3>
+    <p>Enter the admin password to continue.</p>
+    <input class="pwd-input" id="admin-pwd-input" type="password" placeholder="Admin password…" autocomplete="off"
+      onkeydown="if(event.key==='Enter')submitAdminPassword()"/>
+    <div class="pwd-error" id="admin-pwd-error"></div>
+    <div class="pwd-actions">
+      <button class="pwd-cancel" onclick="cancelAdminPrompt()">Cancel</button>
+      <button class="pwd-submit" style="background:#DC2626" onclick="submitAdminPassword()">Enter →</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <h1>ACTIVITIES EVIDENCE REVIEW TOOL</h1>
+  <h2 id="header-act-title">—</h2>
+  <div class="header-row">
+    <div class="who-badge"><div class="wd" id="badge-dot"></div><span id="badge-label">—</span><span style="color:rgba(255,255,255,.35);margin:0 5px;">|</span><span class="switch-link" onclick="showLogin()">Switch ↩</span></div>
+    <div class="fb-badge"><div class="fb-dot" id="fb-dot"></div><span id="fb-lbl">Connecting…</span></div>
+  </div>
+</div>
+
+<div class="act-selector-bar">
+  <div class="act-selector-inner">
+    <span class="act-selector-label">ACTIVITY</span>
+    <select class="act-select" id="act-select" onchange="switchActivity(this.value)"></select>
+    <button class="act-nav-btn" onclick="prevActivity()">← Prev</button>
+    <button class="act-nav-btn" onclick="nextActivity()">Next →</button>
+    <span class="act-progress" id="act-progress">1 / 22</span>
+  </div>
+</div>
+
+<div class="stats-bar" dir="ltr">
+  <div class="sp"><span>Evidences</span><span class="n" id="cnt-total">0</span></div>
+  <div class="sp sr1"><span>R1</span><span class="n" id="cnt-r1">0</span></div>
+  <div class="sp sr2"><span>R2</span><span class="n" id="cnt-r2">0</span></div>
+  <div class="sp sr3"><span>R3</span><span class="n" id="cnt-r3">0</span></div>
+  <div class="sp" style="--rc:var(--r4)"><span style="color:var(--r4)">R4</span><span class="n" id="cnt-r4" style="color:var(--r4)">0</span></div>
+  <div class="sp" style="--rc:var(--r5)"><span style="color:var(--r5)">R5</span><span class="n" id="cnt-r5" style="color:var(--r5)">0</span></div>
+  <div class="sp sall"><span>All 5 ✓</span><span class="n" id="cnt-all">0</span></div>
+  <div class="fx"></div>
+  <div class="live-pill" id="live-pill" style="display:none;"><div class="lp-dot"></div>LIVE</div>
+  <div class="fs-picker" dir="ltr">
+    <span class="fs-picker-label">TEXT</span>
+    <button class="fs-btn sz-s active" id="fs-s" onclick="setFontSize('s')" title="Default">A</button>
+    <button class="fs-btn sz-m" id="fs-m" onclick="setFontSize('m')" title="Medium">A</button>
+    <button class="fs-btn sz-l" id="fs-l" onclick="setFontSize('l')" title="Large">A</button>
+  </div>
+  <button class="tbtn sw" onclick="showLogin()">Switch</button>
+  <button class="tbtn ex" onclick="openExport()">⬇ Export JSON</button>
+</div>
+
+<div class="container" id="main-container">
+  <div class="name-panel" id="name-panel">
+    <div class="name-panel-header"><span class="name-panel-title">📝 Activity Name Suggestions — اقتراح اسم مختلف للنشاط</span></div>
+    <div class="name-panel-body">
+      <div class="current-name-row"><span class="current-name-label">Current Name</span><span class="current-name-value" id="current-name-display">—</span></div>
+      <div class="suggestions-grid" id="suggestions-grid"></div>
+    </div>
+  </div>
+  <div id="cards-quran-wrap"><div class="sec-head q" dir="ltr"><div class="sec-badge q">أ</div><div class="sec-titles"><div class="sec-ar">القرآن الكريم</div><div class="sec-en">A) The Holy Quran</div></div><div class="sec-line"></div></div><div id="cards-quran"></div></div>
+  <div id="cards-bukhari-wrap"><div class="sec-head b" dir="ltr"><div class="sec-badge b">ب</div><div class="sec-titles"><div class="sec-ar">صحيح البخاري</div><div class="sec-en">B) Sahih Al-Bukhari</div></div><div class="sec-line"></div></div><div id="cards-bukhari"></div></div>
+  <div id="cards-muslim-wrap"><div class="sec-head m" dir="ltr"><div class="sec-badge m">ج</div><div class="sec-titles"><div class="sec-ar">صحيح مسلم</div><div class="sec-en">C) Sahih Muslim</div></div><div class="sec-line"></div></div><div id="cards-muslim"></div></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2>Export Voted Evidences</h2>
+    <div class="msub">Filter by vote option and reviewer, then copy the JSON.</div>
+    <div class="etabs">
+      <button class="etab active" id="etab-use" onclick="switchEtab('use')">✅ Use in App (e)</button>
+      <button class="etab" id="etab-all" onclick="switchEtab('all')">All Voted</button>
+      <button class="etab" id="etab-mamoon" onclick="switchEtab('r1')">R1</button>
+      <button class="etab" id="etab-omar" onclick="switchEtab('r2')">R2</button>
+      <button class="etab" id="etab-r3" onclick="switchEtab('r3')">Reviewer 3</button>
+      <button class="etab" id="etab-r4" onclick="switchEtab('r4')">Reviewer 4</button>
+      <button class="etab" id="etab-r5" onclick="switchEtab('r5')">Reviewer 5</button>
+    </div>
+    <div id="modal-content"></div>
+    <div class="mact"><button class="mclose" onclick="closeExport()">Close</button><button class="mcopy" onclick="copyJSON()">Copy JSON</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyDknq1ZViwasZtj0xk6exiUgWgTGyNuTjA",
+  authDomain:"review-e765c.firebaseapp.com",
+  databaseURL:"https://review-e765c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"review-e765c",
+  storageBucket:"review-e765c.firebasestorage.app",
+  messagingSenderId:"1076466413074",
+  appId:"1:1076466413074:web:4fa7fcf29751bfe12932cb"
+});
+const db = firebase.database();
+
+const ACTIVITIES_DATA = [{"id":"salah_waqt","title_ar":"الصلاة على وقتها","evidences":[{"id":"sw_q1","src":"quran","loc_ar":"سورة النساء — الآية (103)","loc_en":"Surah An-Nisa — Verse 103","ar":"فَإِذَا قَضَيْتُمُ الصَّلَاةَ فَاذْكُرُوا اللَّهَ قِيَامًا وَقُعُودًا وَعَلَى جُنُوبِكُمْ فَإِذَا اطْمَأْنَنْتُمْ فَأَقِيمُوا الصَّلَاةَ إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا","en":"And when you have completed the prayer, remember Allah standing, sitting, or lying on your sides. But when you become secure, re-establish regular prayer. Indeed, prayer has been decreed upon the believers a decree of specified times."},{"id":"sw_q2","src":"quran","loc_ar":"سورة الإسراء — الآية (78)","loc_en":"Surah Al-Isra — Verse 78","ar":"أَقِمِ الصَّلَاةَ لِدُلُوكِ الشَّمْسِ إِلَى غَسَقِ اللَّيْلِ وَقُرْآنَ الْفَجْرِ إِنَّ قُرْآنَ الْفَجْرِ كَانَ مَشْهُودًا","en":"Establish prayer at the decline of the sun from its meridian until the darkness of the night and also the Quran of dawn. Indeed, the recitation of dawn is ever witnessed."},{"id":"sw_q3","src":"quran","loc_ar":"سورة هود — الآية (114)","loc_en":"Surah Hud — Verse 114","ar":"وَأَقِمِ الصَّلَاةَ طَرَفَيِ النَّهَارِ وَزُلَفًا مِنَ اللَّيْلِ إِنَّ الْحَسَنَاتِ يُذْهِبْنَ السَّيِّئَاتِ ذَلِكَ ذِكْرَى لِلذَّاكِرِينَ","en":"And establish prayer at the two ends of the day and at the approach of the night. Indeed, good deeds do away with misdeeds. That is a reminder for those who remember."},{"id":"sw_q4","src":"quran","loc_ar":"سورة طه — الآية (130)","loc_en":"Surah Ta-Ha — Verse 130","ar":"وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ غُرُوبِهَا وَمِنْ آنَاءِ اللَّيْلِ فَسَبِّحْ وَأَطْرَافَ النَّهَارِ لَعَلَّكَ تَرْضَى","en":"And exalt Allah with praise of your Lord before the rising of the sun and before its setting; and during periods of the night exalt Him and at the ends of the day, that you may be satisfied."},{"id":"sw_q5","src":"quran","loc_ar":"سورة البقرة — الآية (238)","loc_en":"Surah Al-Baqarah — Verse 238","ar":"حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَى وَقُومُوا لِلَّهِ قَانِتِينَ","en":"Maintain with care the obligatory prayers and the middle prayer and stand before Allah in devout obedience."},{"id":"sw_q6","src":"quran","loc_ar":"سورة المؤمنون — الآيتان (9-10)","loc_en":"Surah Al-Mu'minun — Verses 9-10","ar":"وَالَّذِينَ هُمْ عَلَى صَلَوَاتِهِمْ يُحَافِظُونَ (9) أُولَئِكَ هُمُ الْوَارِثُونَ","en":"And they who carefully maintain their prayers — those are the inheritors."},{"id":"sw_q7","src":"quran","loc_ar":"سورة المعارج — الآية (34)","loc_en":"Surah Al-Ma'arij — Verse 34","ar":"وَالَّذِينَ هُمْ عَلَى صَلَاتِهِمْ يُحَافِظُونَ","en":"And they who strictly preserve their prayers."},{"id":"sw_q8","src":"quran","loc_ar":"سورة مريم — الآية (59)","loc_en":"Surah Maryam — Verse 59","ar":"فَخَلَفَ مِنْ بَعْدِهِمْ خَلْفٌ أَضَاعُوا الصَّلَاةَ وَاتَّبَعُوا الشَّهَوَاتِ فَسَوْفَ يَلْقَوْنَ غَيًّا","en":"But there came after them successors who neglected prayer and pursued desires; so they are going to meet evil."},{"id":"sw_b1","src":"bukhari","loc_ar":"كتاب مواقيت الصلاة — رقم الحديث: 527","loc_en":"Book of Prayer Times — Hadith No. 527","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ مَسْعُودٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abdullah ibn Mas'ud (may Allah be pleased with him)","ar":"سَأَلْتُ النَّبِيَّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: أَيُّ الْعَمَلِ أَحَبُّ إِلَى اللَّهِ؟ قَالَ: «الصَّلَاةُ عَلَى وَقْتِهَا» قَالَ: ثُمَّ أَيُّ؟ قَالَ: «ثُمَّ بِرُّ الْوَالِدَيْنِ» قَالَ: ثُمَّ أَيُّ؟ قَالَ: «الْجِهَادُ فِي سَبِيلِ اللَّهِ»","en":"I asked the Prophet (peace be upon him): Which deed is most beloved to Allah? He said: Prayer at its appointed time. I said: Then what? He said: Then dutifulness to parents. I said: Then what? He said: Then striving in the cause of Allah."},{"id":"sw_b2","src":"bukhari","loc_ar":"كتاب مواقيت الصلاة — رقم الحديث: 521","loc_en":"Book of Prayer Times — Hadith No. 521","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"يَتَعَاقَبُونَ فِيكُمْ مَلَائِكَةٌ بِاللَّيْلِ وَمَلَائِكَةٌ بِالنَّهَارِ، وَيَجْتَمِعُونَ فِي صَلَاةِ الْفَجْرِ وَصَلَاةِ الْعَصْرِ، ثُمَّ يَعْرُجُ الَّذِينَ بَاتُوا فِيكُمْ فَيَسْأَلُهُمْ رَبُّهُمْ وَهُوَ أَعْلَمُ بِهِمْ: كَيْفَ تَرَكْتُمْ عِبَادِي؟ فَيَقُولُونَ: تَرَكْنَاهُمْ وَهُمْ يُصَلُّونَ، وَأَتَيْنَاهُمْ وَهُمْ يُصَلُّونَ","en":"Angels take turns among you by night and by day, and they all assemble at the Fajr and Asr prayers. Then those who spent the night with you ascend, and their Lord asks them — though He knows best — How did you leave My servants? They say: We left them while they were praying, and we came to them while they were praying."},{"id":"sw_b3","src":"bukhari","loc_ar":"كتاب مواقيت الصلاة — رقم الحديث: 563","loc_en":"Book of Prayer Times — Hadith No. 563","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Abdullah ibn Umar (may Allah be pleased with them both)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «الَّذِي تَفُوتُهُ صَلَاةُ الْعَصْرِ كَأَنَّمَا وُتِرَ أَهْلَهُ وَمَالَهُ»","en":"The Messenger of Allah (peace be upon him) said: The one who misses the Asr prayer is as if he has lost his family and his wealth."},{"id":"sw_b4","src":"bukhari","loc_ar":"كتاب مواقيت الصلاة — رقم الحديث: 597","loc_en":"Book of Prayer Times — Hadith No. 597","narr_ar":"عَنْ أَنَسِ بْنِ مَالِكٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Anas ibn Malik (may Allah be pleased with him)","ar":"كَانَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ يُصَلِّي الْعَصْرَ وَالشَّمْسُ بَيْضَاءُ مُرْتَفِعَةٌ حَيَّةٌ","en":"The Prophet (peace be upon him) used to pray Asr while the sun was still white and high and bright."},{"id":"sw_b5","src":"bukhari","loc_ar":"كتاب مواقيت الصلاة — رقم الحديث: 626","loc_en":"Book of Prayer Times — Hadith No. 626","narr_ar":"عَنْ أَنَسِ بْنِ مَالِكٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Anas ibn Malik (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ نَسِيَ صَلَاةً أَوْ نَامَ عَنْهَا فَكَفَّارَتُهَا أَنْ يُصَلِّيَهَا إِذَا ذَكَرَهَا»","en":"The Messenger of Allah (peace be upon him) said: Whoever forgets a prayer or sleeps through it, its expiation is to pray it when he remembers it."},{"id":"sw_m1","src":"muslim","loc_ar":"كتاب الإيمان — رقم الحديث: 85","loc_en":"Book of Faith — Hadith No. 85","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ مَسْعُودٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abdullah ibn Mas'ud (may Allah be pleased with him)","ar":"سَأَلْتُ رَسُولَ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: أَيُّ الْأَعْمَالِ أَفْضَلُ؟ قَالَ: «الصَّلَاةُ لِوَقْتِهَا» قُلْتُ: ثُمَّ أَيٌّ؟ قَالَ: «بِرُّ الْوَالِدَيْنِ» قُلْتُ: ثُمَّ أَيٌّ؟ قَالَ: «الْجِهَادُ فِي سَبِيلِ اللَّهِ»","en":"I asked the Messenger of Allah (peace be upon him): Which deeds are most virtuous? He said: Prayer at its appointed time. I said: Then what? He said: Dutifulness to parents. I said: Then what? He said: Striving in the cause of Allah."},{"id":"sw_m2","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 632","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 632","narr_ar":"عَنْ أَبِي مُوسَى الْأَشْعَرِيِّ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Musa Al-Ash'ari (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ صَلَّى الْبَرْدَيْنِ دَخَلَ الْجَنَّةَ»","en":"The Messenger of Allah (peace be upon him) said: Whoever prays the two cool prayers (Fajr and Asr) will enter Paradise."},{"id":"sw_m3","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 657","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 657","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Abdullah ibn Umar (may Allah be pleased with them both)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «الَّذِي تَفُوتُهُ صَلَاةُ الْعَصْرِ كَأَنَّمَا وُتِرَ أَهْلَهُ وَمَالَهُ»","en":"The Messenger of Allah (peace be upon him) said: The one who misses the Asr prayer is as though he has lost his family and his wealth."},{"id":"sw_m4","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 684","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 684","narr_ar":"عَنْ أُمِّ فَرْوَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Umm Farwah (may Allah be pleased with her)","ar":"سُئِلَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: أَيُّ الْأَعْمَالِ أَفْضَلُ؟ قَالَ: «الصَّلَاةُ فِي أَوَّلِ وَقْتِهَا»","en":"The Messenger of Allah (peace be upon him) was asked: Which deeds are most virtuous? He said: Prayer at the beginning of its appointed time."}]},{"id":"salah_jamaa","title_ar":"الصلاة في جماعة","evidences":[{"id":"sj_q1","src":"quran","loc_ar":"سورة البقرة — الآية (43)","loc_en":"Surah Al-Baqarah — Verse 43","ar":"وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ","en":"And establish prayer and give zakah and bow with those who bow in worship and obedience."},{"id":"sj_q2","src":"quran","loc_ar":"سورة النساء — الآية (102)","loc_en":"Surah An-Nisa — Verse 102","ar":"وَإِذَا كُنْتَ فِيهِمْ فَأَقَمْتَ لَهُمُ الصَّلَاةَ فَلْتَقُمْ طَائِفَةٌ مِنْهُمْ مَعَكَ وَلْيَأْخُذُوا أَسْلِحَتَهُمْ فَإِذَا سَجَدُوا فَلْيَكُونُوا مِنْ وَرَائِكُمْ وَلْتَأْتِ طَائِفَةٌ أُخْرَى لَمْ يُصَلُّوا فَلْيُصَلُّوا مَعَكَ","en":"And when you are among them and lead them in prayer, let a group of them stand in prayer with you and let them carry their arms. And when they have prostrated, let them be behind you, and let another group come who have not yet prayed and let them pray with you."},{"id":"sj_q3","src":"quran","loc_ar":"سورة الجمعة — الآية (9)","loc_en":"Surah Al-Jumu'ah — Verse 9","ar":"يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِنْ يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ وَذَرُوا الْبَيْعَ ذَلِكُمْ خَيْرٌ لَكُمْ إِنْ كُنْتُمْ تَعْلَمُونَ","en":"O you who have believed, when the adhan is called for the prayer on Friday, then proceed to the remembrance of Allah and leave trade. That is better for you, if you only knew."},{"id":"sj_q4","src":"quran","loc_ar":"سورة النور — الآيتان (36-37)","loc_en":"Surah An-Nur — Verses 36-37","ar":"فِي بُيُوتٍ أَذِنَ اللَّهُ أَنْ تُرْفَعَ وَيُذْكَرَ فِيهَا اسْمُهُ يُسَبِّحُ لَهُ فِيهَا بِالْغُدُوِّ وَالْآصَالِ (36) رِجَالٌ لَا تُلْهِيهِمْ تِجَارَةٌ وَلَا بَيْعٌ عَنْ ذِكْرِ اللَّهِ وَإِقَامِ الصَّلَاةِ وَإِيتَاءِ الزَّكَاةِ يَخَافُونَ يَوْمًا تَتَقَلَّبُ فِيهِ الْقُلُوبُ وَالْأَبْصَارُ","en":"In houses which Allah has ordered to be raised and that His name be mentioned therein; exalting Him within them in the morning and the evenings — Men whom neither commerce nor sale distracts from the remembrance of Allah and performance of prayer and giving of zakah; they fear a Day in which the hearts and eyes will tremble."},{"id":"sj_q5","src":"quran","loc_ar":"سورة الفتح — الآية (29)","loc_en":"Surah Al-Fath — Verse 29","ar":"مُحَمَّدٌ رَسُولُ اللَّهِ وَالَّذِينَ مَعَهُ أَشِدَّاءُ عَلَى الْكُفَّارِ رُحَمَاءُ بَيْنَهُمْ تَرَاهُمْ رُكَّعًا سُجَّدًا يَبْتَغُونَ فَضْلًا مِنَ اللَّهِ وَرِضْوَانًا","en":"Muhammad is the Messenger of Allah; and those with him are forceful against the disbelievers, merciful among themselves. You see them bowing and prostrating in prayer, seeking bounty from Allah and His pleasure."},{"id":"sj_b1","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 645","loc_en":"Book of the Call to Prayer — Hadith No. 645","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Abdullah ibn Umar (may Allah be pleased with them both)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «صَلَاةُ الْجَمَاعَةِ أَفْضَلُ مِنْ صَلَاةِ الْفَذِّ بِسَبْعٍ وَعِشْرِينَ دَرَجَةً»","en":"The Messenger of Allah (peace be upon him) said: Prayer in congregation is superior to prayer alone by twenty-seven degrees."},{"id":"sj_b2","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 657","loc_en":"Book of the Call to Prayer — Hadith No. 657","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «وَالَّذِي نَفْسِي بِيَدِهِ لَقَدْ هَمَمْتُ أَنْ آمُرَ بِحَطَبٍ فَيُحْطَبَ ثُمَّ آمُرَ بِالصَّلَاةِ فَيُؤَذَّنَ لَهَا ثُمَّ آمُرَ رَجُلًا فَيَؤُمَّ النَّاسَ ثُمَّ أُخَالِفَ إِلَى رِجَالٍ فَأُحَرِّقَ عَلَيْهِمْ بُيُوتَهُمْ»","en":"The Messenger of Allah (peace be upon him) said: By Him in Whose hand my soul is, I was about to order firewood to be collected, then order the prayer to be announced, then appoint a man to lead the people in prayer, then go to men who do not attend the congregation and burn their houses over them."},{"id":"sj_b3","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 660","loc_en":"Book of the Call to Prayer — Hadith No. 660","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «صَلَاةُ الرَّجُلِ فِي الْجَمَاعَةِ تُضَعَّفُ عَلَى صَلَاتِهِ فِي بَيْتِهِ وَفِي سُوقِهِ خَمْسًا وَعِشْرِينَ ضِعْفًا وَذَلِكَ أَنَّهُ إِذَا تَوَضَّأَ فَأَحْسَنَ الْوُضُوءَ ثُمَّ خَرَجَ إِلَى الْمَسْجِدِ لَا يُخْرِجُهُ إِلَّا الصَّلَاةُ لَمْ يَخْطُ خَطْوَةً إِلَّا رُفِعَتْ لَهُ بِهَا دَرَجَةٌ وَحُطَّ عَنْهُ بِهَا خَطِيئَةٌ»","en":"The Messenger of Allah (peace be upon him) said: The prayer of a man in congregation is multiplied twenty-five times over his prayer at home or in the market. That is because when he performs ablution thoroughly, then goes out to the mosque — his sole purpose being the prayer — he does not take a step without being raised a degree and having a sin erased."},{"id":"sj_b4","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 676","loc_en":"Book of the Call to Prayer — Hadith No. 676","narr_ar":"عَنْ أَنَسِ بْنِ مَالِكٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Anas ibn Malik (may Allah be pleased with him)","ar":"كَانَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ إِذَا أُقِيمَتِ الصَّلَاةُ أَقْبَلَ عَلَيْنَا بِوَجْهِهِ فَقَالَ: «أَقِيمُوا صُفُوفَكُمْ وَتَرَاصُّوا فَإِنِّي أَرَاكُمْ مِنْ وَرَاءِ ظَهْرِي»","en":"When the prayer was called, the Prophet (peace be upon him) would face us and say: Straighten your rows and stand close together, for I can see you from behind my back."},{"id":"sj_b5","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 723","loc_en":"Book of the Call to Prayer — Hadith No. 723","narr_ar":"عَنِ ابْنِ مَسْعُودٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Ibn Mas'ud (may Allah be pleased with him)","ar":"مَنْ سَرَّهُ أَنْ يَلْقَى اللَّهَ غَدًا مُسْلِمًا فَلْيُحَافِظْ عَلَى هَؤُلَاءِ الصَّلَوَاتِ حَيْثُ يُنَادَى بِهِنَّ فَإِنَّ اللَّهَ شَرَعَ لِنَبِيِّكُمْ سُنَنَ الْهُدَى وَإِنَّهُنَّ مِنْ سُنَنِ الْهُدَى وَلَوْ أَنَّكُمْ صَلَّيْتُمْ فِي بُيُوتِكُمْ كَمَا يُصَلِّي هَذَا الْمُتَخَلِّفُ فِي بَيْتِهِ لَتَرَكْتُمْ سُنَّةَ نَبِيِّكُمْ وَلَوْ تَرَكْتُمْ سُنَّةَ نَبِيِّكُمْ لَضَلَلْتُمْ","en":"Whoever is pleased to meet Allah tomorrow as a Muslim, let him maintain these prayers where the call to them is made. For Allah has prescribed for your Prophet the ways of guidance, and these are among the ways of guidance. If you were to pray in your houses as this one who stays behind prays in his house, you would have abandoned the Sunnah of your Prophet, and if you abandoned the Sunnah of your Prophet, you would go astray."},{"id":"sj_m1","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 649","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 649","narr_ar":"عَنْ عُثْمَانَ بْنِ عَفَّانَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Uthman ibn Affan (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ صَلَّى الْعِشَاءَ فِي جَمَاعَةٍ فَكَأَنَّمَا قَامَ نِصْفَ اللَّيْلِ، وَمَنْ صَلَّى الصُّبْحَ فِي جَمَاعَةٍ فَكَأَنَّمَا صَلَّى اللَّيْلَ كُلَّهُ»","en":"The Messenger of Allah (peace be upon him) said: Whoever prays Isha in congregation it is as if he prayed for half the night, and whoever prays Fajr in congregation it is as if he prayed the whole night."},{"id":"sj_m2","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 650","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 650","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «صَلَاةُ الرَّجُلِ فِي جَمَاعَةٍ تَزِيدُ عَلَى صَلَاتِهِ فِي بَيْتِهِ وَصَلَاتِهِ فِي سُوقِهِ خَمْسًا وَعِشْرِينَ دَرَجَةً»","en":"The Messenger of Allah (peace be upon him) said: The prayer of a man in congregation exceeds his prayer at home and his prayer in the market by twenty-five degrees."},{"id":"sj_m3","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 654","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 654","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «أَثْقَلُ صَلَاةٍ عَلَى الْمُنَافِقِينَ صَلَاةُ الْعِشَاءِ وَصَلَاةُ الْفَجْرِ وَلَوْ يَعْلَمُونَ مَا فِيهِمَا لَأَتَوْهُمَا وَلَوْ حَبْوًا»","en":"The Messenger of Allah (peace be upon him) said: The heaviest prayers for the hypocrites are Isha and Fajr. If they knew what they contain, they would come to them even if they had to crawl."},{"id":"sj_m4","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 655","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 655","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"أَتَى رَسُولَ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ رَجُلٌ أَعْمَى فَقَالَ: يَا رَسُولَ اللَّهِ إِنَّهُ لَيْسَ لِي قَائِدٌ يَقُودُنِي إِلَى الْمَسْجِدِ، فَسَأَلَ رَسُولَ اللَّهِ أَنْ يُرَخِّصَ لَهُ فَيُصَلِّيَ فِي بَيْتِهِ فَرَخَّصَ لَهُ، فَلَمَّا وَلَّى دَعَاهُ فَقَالَ: «هَلْ تَسْمَعُ النِّدَاءَ بِالصَّلَاةِ؟» قَالَ: نَعَمْ. قَالَ: «فَأَجِبْ»","en":"A blind man came to the Messenger of Allah (peace be upon him) and said: O Messenger of Allah, I have no one to guide me to the mosque. He asked for permission to pray at home, and permission was granted. But as he turned away, the Prophet called him back and said: Do you hear the call to prayer? He said: Yes. He said: Then respond to it."},{"id":"sj_m5","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 662","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 662","narr_ar":"عَنْ أَبِي سَعِيدٍ الْخُدْرِيِّ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Sa'id Al-Khudri (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «الصَّلَاةُ فِي جَمَاعَةٍ تَعْدِلُ خَمْسًا وَعِشْرِينَ صَلَاةً فَإِذَا صَلَّاهَا فِي فَلَاةٍ فَأَتَمَّ رُكُوعَهَا وَسُجُودَهَا بَلَغَتْ خَمْسِينَ صَلَاةً»","en":"The Messenger of Allah (peace be upon him) said: Prayer in congregation equals twenty-five prayers. And if he prays it in open land and perfects its bowing and prostration, it reaches fifty prayers."}]},{"id":"mashi_masjid","title_ar":"المشي للمسجد","evidences":[{"id":"mm_q1","src":"quran","loc_ar":"سورة التوبة — الآية (18)","loc_en":"Surah At-Tawbah — Verse 18","ar":"إِنَّمَا يَعْمُرُ مَسَاجِدَ اللَّهِ مَنْ آمَنَ بِاللَّهِ وَالْيَوْمِ الْآخِرِ وَأَقَامَ الصَّلَاةَ وَآتَى الزَّكَاةَ وَلَمْ يَخْشَ إِلَّا اللَّهَ فَعَسَى أُولَئِكَ أَنْ يَكُونُوا مِنَ الْمُهْتَدِينَ","en":"The mosques of Allah are only to be maintained by those who believe in Allah and the Last Day and establish prayer and give zakah and do not fear except Allah. For it is expected that those will be of the rightly guided."},{"id":"mm_q2","src":"quran","loc_ar":"سورة الجن — الآية (18)","loc_en":"Surah Al-Jinn — Verse 18","ar":"وَأَنَّ الْمَسَاجِدَ لِلَّهِ فَلَا تَدْعُوا مَعَ اللَّهِ أَحَدًا","en":"And indeed, the mosques are for Allah, so do not invoke with Allah anyone."},{"id":"mm_q3","src":"quran","loc_ar":"سورة النور — الآية (36)","loc_en":"Surah An-Nur — Verse 36","ar":"فِي بُيُوتٍ أَذِنَ اللَّهُ أَنْ تُرْفَعَ وَيُذْكَرَ فِيهَا اسْمُهُ يُسَبِّحُ لَهُ فِيهَا بِالْغُدُوِّ وَالْآصَالِ","en":"In houses which Allah has ordered to be raised and that His name be mentioned therein; exalting Him within them in the morning and the evenings."},{"id":"mm_q4","src":"quran","loc_ar":"سورة الجمعة — الآية (9)","loc_en":"Surah Al-Jumu'ah — Verse 9","ar":"يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِنْ يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَى ذِكْرِ اللَّهِ وَذَرُوا الْبَيْعَ ذَلِكُمْ خَيْرٌ لَكُمْ إِنْ كُنْتُمْ تَعْلَمُونَ","en":"O you who have believed, when the adhan is called for the prayer on Friday, then proceed to the remembrance of Allah and leave trade. That is better for you, if you only knew."},{"id":"mm_b1","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 647","loc_en":"Book of the Call to Prayer — Hadith No. 647","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ تَطَهَّرَ فِي بَيْتِهِ ثُمَّ مَشَى إِلَى بَيْتٍ مِنْ بُيُوتِ اللَّهِ لِيَقْضِيَ فَرِيضَةً مِنْ فَرَائِضِ اللَّهِ كَانَتْ خَطْوَتَاهُ إِحْدَاهُمَا تَحُطُّ خَطِيئَةً وَالْأُخْرَى تَرْفَعُ دَرَجَةً»","en":"The Messenger of Allah (peace be upon him) said: Whoever purifies himself at home, then walks to one of the houses of Allah to fulfill one of the obligations of Allah — one of his steps will erase a sin and the other will raise him a degree."},{"id":"mm_b2","src":"bukhari","loc_ar":"كتاب الصلاة — رقم الحديث: 477","loc_en":"Book of Prayer — Hadith No. 477","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ غَدَا إِلَى الْمَسْجِدِ وَرَاحَ أَعَدَّ اللَّهُ لَهُ نُزُلَهُ مِنَ الْجَنَّةِ كُلَّمَا غَدَا أَوْ رَاحَ»","en":"The Messenger of Allah (peace be upon him) said: Whoever goes to the mosque in the morning and evening, Allah prepares for him a place in Paradise for every morning and evening he does so."},{"id":"mm_b3","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 660","loc_en":"Book of the Call to Prayer — Hadith No. 660","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «صَلَاةُ الرَّجُلِ فِي الْجَمَاعَةِ تُضَعَّفُ عَلَى صَلَاتِهِ فِي بَيْتِهِ وَفِي سُوقِهِ خَمْسًا وَعِشْرِينَ ضِعْفًا وَذَلِكَ أَنَّهُ إِذَا تَوَضَّأَ فَأَحْسَنَ الْوُضُوءَ ثُمَّ خَرَجَ إِلَى الْمَسْجِدِ لَا يُخْرِجُهُ إِلَّا الصَّلَاةُ لَمْ يَخْطُ خَطْوَةً إِلَّا رُفِعَتْ لَهُ بِهَا دَرَجَةٌ وَحُطَّ عَنْهُ بِهَا خَطِيئَةٌ فَإِذَا صَلَّى لَمْ تَزَلِ الْمَلَائِكَةُ تُصَلِّي عَلَيْهِ مَا دَامَ فِي مُصَلَّاهُ»","en":"The Messenger of Allah (peace be upon him) said: The prayer of a man in congregation is multiplied twenty-five times over his prayer at home or in the market. When he performs ablution thoroughly then goes out to the mosque — his sole purpose being the prayer — he does not take a single step without being raised a degree and having a sin erased. And when he prays, the angels do not cease to send blessings upon him as long as he remains in his place of prayer."},{"id":"mm_b4","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 662","loc_en":"Book of the Call to Prayer — Hadith No. 662","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «إِذَا تَوَضَّأَ أَحَدُكُمْ فَأَحْسَنَ وُضُوءَهُ ثُمَّ خَرَجَ عَامِدًا إِلَى الْمَسْجِدِ فَلَا يُشَبِّكَنَّ بَيْنَ أَصَابِعِهِ فَإِنَّهُ فِي صَلَاةٍ»","en":"The Messenger of Allah (peace be upon him) said: When one of you performs ablution well then goes out intending to the mosque, let him not interlace his fingers, for he is in a state of prayer."},{"id":"mm_b5","src":"bukhari","loc_ar":"كتاب التهجد — رقم الحديث: 1186","loc_en":"Book of Tahajjud — Hadith No. 1186","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «بَيْنَمَا رَجُلٌ يَمْشِي بِطَرِيقٍ وَجَدَ غُصْنَ شَوْكٍ عَلَى الطَّرِيقِ فَأَخَّرَهُ فَشَكَرَ اللَّهُ لَهُ فَغَفَرَ لَهُ»","en":"The Messenger of Allah (peace be upon him) said: While a man was walking on a road, he found a thorny branch and removed it. Allah thanked him for it and forgave him."},{"id":"mm_b6","src":"bukhari","loc_ar":"كتاب الأذان — رقم الحديث: 656","loc_en":"Book of the Call to Prayer — Hadith No. 656","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «أَبْشِرُوا هَذَا رَبُّكُمْ قَدْ فَتَحَ بَابًا مِنْ أَبْوَابِ السَّمَاءِ يُبَاهِي بِكُمُ الْمَلَائِكَةَ يَقُولُ: انْظُرُوا إِلَى عِبَادِي قَدْ قَضَوْا فَرِيضَةً وَهُمْ يَنْتَظِرُونَ أُخْرَى»","en":"The Messenger of Allah (peace be upon him) said: Receive glad tidings — your Lord has opened a gate of heaven and is showing you off to the angels, saying: Look at My servants who have fulfilled one obligation and are now waiting for the next."},{"id":"mm_m1","src":"muslim","loc_ar":"كتاب الطهارة — رقم الحديث: 666","loc_en":"Book of Purification — Hadith No. 666","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «أَلَا أَدُلُّكُمْ عَلَى مَا يَمْحُو اللَّهُ بِهِ الْخَطَايَا وَيَرْفَعُ بِهِ الدَّرَجَاتِ؟» قَالُوا: بَلَى يَا رَسُولَ اللَّهِ. قَالَ: «إِسْبَاغُ الْوُضُوءِ عَلَى الْمَكَارِهِ وَكَثْرَةُ الْخُطَا إِلَى الْمَسَاجِدِ وَانْتِظَارُ الصَّلَاةِ بَعْدَ الصَّلَاةِ فَذَلِكُمُ الرِّبَاطُ فَذَلِكُمُ الرِّبَاطُ فَذَلِكُمُ الرِّبَاطُ»","en":"The Messenger of Allah (peace be upon him) said: Shall I not tell you of that by which Allah erases sins and raises degrees? They said: Yes, O Messenger of Allah. He said: Performing ablution thoroughly despite hardship, taking many steps to the mosques, and waiting for one prayer after another — that is the guarding of the frontier, that is the guarding of the frontier, that is the guarding of the frontier."},{"id":"mm_m2","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 1540","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 1540","narr_ar":"عَنْ أُبَيِّ بْنِ كَعْبٍ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Ubayy ibn Ka'b (may Allah be pleased with him)","ar":"كَانَ رَجُلٌ لَا أَعْلَمُ رَجُلًا أَبْعَدَ مِنَ الْمَسْجِدِ مِنْهُ وَكَانَ لَا تُخْطِئُهُ صَلَاةٌ فَقِيلَ لَهُ لَوِ اشْتَرَيْتَ حِمَارًا تَرْكَبُهُ فِي الظَّلْمَاءِ وَفِي الرَّمْضَاءِ قَالَ: مَا يَسُرُّنِي أَنَّ مَنْزِلِي إِلَى جَنْبِ الْمَسْجِدِ إِنِّي أُرِيدُ أَنْ يُكْتَبَ لِي مَمْشَايَ إِلَى الْمَسْجِدِ وَرُجُوعِي إِذَا رَجَعْتُ إِلَى أَهْلِي فَقَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «قَدْ جَمَعَ اللَّهُ لَكَ ذَلِكَ كُلَّهُ»","en":"There was a man whom I know of no one living farther from the mosque than him, yet he never missed a prayer. It was said to him: Why not buy a donkey to ride in the dark and in the heat? He replied: I would not be pleased to have my house next to the mosque, for I want my walking to the mosque and my return home to be recorded for me. The Messenger of Allah (peace be upon him) said: Allah has gathered all of that for you."},{"id":"mm_m3","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 649","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 649","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ تَطَهَّرَ فِي بَيْتِهِ ثُمَّ أَتَى مَسْجِدَ قُبَاءٍ فَصَلَّى فِيهِ صَلَاةً كَانَ لَهُ كَأَجْرِ عُمْرَةٍ»","en":"The Messenger of Allah (peace be upon him) said: Whoever purifies himself at home, then comes to the mosque of Quba and prays in it, will have a reward like that of Umrah."},{"id":"mm_m4","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 669","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 669","narr_ar":"عَنْ بُرَيْدَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Buraydah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «بَشِّرِ الْمَشَّائِينَ فِي الظُّلَمِ إِلَى الْمَسَاجِدِ بِالنُّورِ التَّامِّ يَوْمَ الْقِيَامَةِ»","en":"The Messenger of Allah (peace be upon him) said: Give glad tidings to those who walk to the mosques in darkness — they will have perfect light on the Day of Resurrection."},{"id":"mm_m5","src":"muslim","loc_ar":"كتاب المساجد ومواضع الصلاة — رقم الحديث: 663","loc_en":"Book of Mosques and Places of Prayer — Hadith No. 663","narr_ar":"عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ","narr_en":"Narrated by Abu Hurairah (may Allah be pleased with him)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «إِذَا تَوَضَّأَ أَحَدُكُمْ فَأَحْسَنَ الْوُضُوءَ ثُمَّ خَرَجَ إِلَى الْمَسْجِدِ لَا يُخْرِجُهُ إِلَّا الصَّلَاةُ كَتَبَ اللَّهُ لَهُ بِكُلِّ خَطْوَةٍ يَخْطُوهَا حَسَنَةً وَيَمْحُو عَنْهُ بِهَا سَيِّئَةً»","en":"The Messenger of Allah (peace be upon him) said: When one of you performs ablution well and then goes out to the mosque — his only purpose being the prayer — Allah records for him with every step he takes a good deed and erases from him a sin."}]},{"id":"sunan_rawatib","title_ar":"السنن الرواتب","evidences":[{"id":"sr_q1","src":"quran","loc_ar":"سورة الإسراء — الآية (79)","loc_en":"Surah Al-Isra — Verse 79","ar":"وَمِنَ اللَّيْلِ فَتَهَجَّدْ بِهِ نَافِلَةً لَكَ عَسَى أَنْ يَبْعَثَكَ رَبُّكَ مَقَامًا مَحْمُودًا","en":"And from the night, pray with it as additional worship for you; it is expected that your Lord will resurrect you to a praised station."},{"id":"sr_q2","src":"quran","loc_ar":"سورة طه — الآيتان (130-132)","loc_en":"Surah Ta-Ha — Verses 130-132","ar":"وَسَبِّحْ بِحَمْدِ رَبِّكَ قَبْلَ طُلُوعِ الشَّمْسِ وَقَبْلَ غُرُوبِهَا وَمِنْ آنَاءِ اللَّيْلِ فَسَبِّحْ وَأَطْرَافَ النَّهَارِ لَعَلَّكَ تَرْضَى (130) وَلَا تَمُدَّنَّ عَيْنَيْكَ إِلَى مَا مَتَّعْنَا بِهِ أَزْوَاجًا مِنْهُمْ زَهْرَةَ الْحَيَاةِ الدُّنْيَا (131) وَأْمُرْ أَهْلَكَ بِالصَّلَاةِ وَاصْطَبِرْ عَلَيْهَا لَا نَسْأَلُكَ رِزْقًا نَحْنُ نَرْزُقُكَ وَالْعَاقِبَةُ لِلتَّقْوَى","en":"And exalt Allah with praise of your Lord before the rising of the sun and before its setting; and during periods of the night exalt Him and at the ends of the day, that you may be satisfied. And do not extend your eyes toward what We have given for enjoyment to some categories of the disbelievers. And enjoin prayer upon your family and be steadfast therein. We ask you not for provision; We provide for you, and the best outcome is for righteousness."},{"id":"sr_q3","src":"quran","loc_ar":"سورة الذاريات — الآيتان (17-18)","loc_en":"Surah Adh-Dhariyat — Verses 17-18","ar":"كَانُوا قَلِيلًا مِنَ اللَّيْلِ مَا يَهْجَعُونَ (17) وَبِالْأَسْحَارِ هُمْ يَسْتَغْفِرُونَ","en":"They used to sleep but little of the night, and in the hours before dawn they would seek forgiveness."},{"id":"sr_b1","src":"bukhari","loc_ar":"كتاب التطوع — رقم الحديث: 1180","loc_en":"Book of Voluntary Prayers — Hadith No. 1180","narr_ar":"عَنْ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Aisha (may Allah be pleased with her)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «رَكْعَتَا الْفَجْرِ خَيْرٌ مِنَ الدُّنْيَا وَمَا فِيهَا»","en":"The Messenger of Allah (peace be upon him) said: The two rak'ahs of Fajr are better than this world and everything in it."},{"id":"sr_b2","src":"bukhari","loc_ar":"كتاب التطوع — رقم الحديث: 1169","loc_en":"Book of Voluntary Prayers — Hadith No. 1169","narr_ar":"عَنْ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Aisha (may Allah be pleased with her)","ar":"لَمْ يَكُنِ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ عَلَى شَيْءٍ مِنَ النَّوَافِلِ أَشَدَّ تَعَاهُدًا مِنْهُ عَلَى رَكْعَتَيِ الْفَجْرِ","en":"The Prophet (peace be upon him) was more regular and more committed to the two rak'ahs of Fajr than to any other voluntary prayer."},{"id":"sr_b3","src":"bukhari","loc_ar":"كتاب التطوع — رقم الحديث: 1176","loc_en":"Book of Voluntary Prayers — Hadith No. 1176","narr_ar":"عَنِ ابْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Ibn Umar (may Allah be pleased with them both)","ar":"حَفِظْتُ مِنَ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ عَشْرَ رَكَعَاتٍ: رَكْعَتَيْنِ قَبْلَ الظُّهْرِ وَرَكْعَتَيْنِ بَعْدَهَا وَرَكْعَتَيْنِ بَعْدَ الْمَغْرِبِ فِي بَيْتِهِ وَرَكْعَتَيْنِ بَعْدَ الْعِشَاءِ فِي بَيْتِهِ وَرَكْعَتَيْنِ قَبْلَ صَلَاةِ الصُّبْحِ","en":"I memorised from the Prophet (peace be upon him) ten rak'ahs: two before Dhuhr and two after it, two after Maghrib in his house, two after Isha in his house, and two before the Fajr prayer."},{"id":"sr_b4","src":"bukhari","loc_ar":"كتاب التهجد — رقم الحديث: 1168","loc_en":"Book of Tahajjud — Hadith No. 1168","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Abdullah ibn Umar (may Allah be pleased with them both)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «رَحِمَ اللَّهُ امْرَأً صَلَّى قَبْلَ الْعَصْرِ أَرْبَعًا»","en":"The Messenger of Allah (peace be upon him) said: May Allah have mercy on the person who prays four rak'ahs before Asr."},{"id":"sr_b5","src":"bukhari","loc_ar":"كتاب التطوع — رقم الحديث: 1173","loc_en":"Book of Voluntary Prayers — Hadith No. 1173","narr_ar":"عَنْ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Aisha (may Allah be pleased with her)","ar":"كَانَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ لَا يَدَعُ أَرْبَعًا قَبْلَ الظُّهْرِ وَرَكْعَتَيْنِ قَبْلَ الْغَدَاةِ","en":"The Prophet (peace be upon him) never abandoned four rak'ahs before Dhuhr and two rak'ahs before the morning prayer."},{"id":"sr_b6","src":"bukhari","loc_ar":"كتاب تقصير الصلاة — رقم الحديث: 1099","loc_en":"Book of Shortening the Prayer — Hadith No. 1099","narr_ar":"عَنِ ابْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Ibn Umar (may Allah be pleased with them both)","ar":"سَافَرْتُ مَعَ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ فَلَمْ يَزِدْ عَلَى رَكْعَتَيْنِ حَتَّى قَبَضَهُ اللَّهُ وَمَعَ أَبِي بَكْرٍ كَذَلِكَ وَمَعَ عُمَرَ وَمَعَ عُثْمَانَ","en":"I travelled with the Prophet (peace be upon him) and he never prayed more than two rak'ahs until Allah took his soul, and likewise with Abu Bakr and Umar and Uthman."},{"id":"sr_m1","src":"muslim","loc_ar":"كتاب صلاة المسافرين وقصرها — رقم الحديث: 728","loc_en":"Book of the Traveler's Prayer — Hadith No. 728","narr_ar":"عَنْ أُمِّ حَبِيبَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Umm Habibah (may Allah be pleased with her)","ar":"قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «مَنْ صَلَّى اثْنَتَيْ عَشْرَةَ رَكْعَةً فِي يَوْمٍ وَلَيْلَةٍ بُنِيَ لَهُ بِهِنَّ بَيْتٌ فِي الْجَنَّةِ»","en":"The Messenger of Allah (peace be upon him) said: Whoever prays twelve rak'ahs in a day and night, a house will be built for him in Paradise because of them."},{"id":"sr_m2","src":"muslim","loc_ar":"كتاب صلاة المسافرين وقصرها — رقم الحديث: 729","loc_en":"Book of the Traveler's Prayer — Hadith No. 729","narr_ar":"عَنْ أُمِّ حَبِيبَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Umm Habibah (may Allah be pleased with her)","ar":"قَالَتْ: سَمِعْتُ رَسُولَ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ يَقُولُ: «مَنْ حَافَظَ عَلَى أَرْبَعِ رَكَعَاتٍ قَبْلَ الظُّهْرِ وَأَرْبَعٍ بَعْدَهَا حَرَّمَهُ اللَّهُ عَلَى النَّارِ»","en":"She said: I heard the Messenger of Allah (peace be upon him) say: Whoever maintains four rak'ahs before Dhuhr and four after it, Allah will forbid him to the Fire."},{"id":"sr_m3","src":"muslim","loc_ar":"كتاب صلاة المسافرين وقصرها — رقم الحديث: 730","loc_en":"Book of the Traveler's Prayer — Hadith No. 730","narr_ar":"عَنْ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Aisha (may Allah be pleased with her)","ar":"كَانَ النَّبِيُّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ لَا يَدَعُ أَرْبَعًا قَبْلَ الظُّهْرِ وَرَكْعَتَيْنِ قَبْلَ الْغَدَاةِ","en":"The Prophet (peace be upon him) never abandoned four rak'ahs before Dhuhr and two rak'ahs before the morning prayer."},{"id":"sr_m4","src":"muslim","loc_ar":"كتاب صلاة المسافرين وقصرها — رقم الحديث: 721","loc_en":"Book of the Traveler's Prayer — Hadith No. 721","narr_ar":"عَنْ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Aisha (may Allah be pleased with her)","ar":"قَالَتْ: إِنَّ النَّبِيَّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ كَانَ إِذَا فَاتَتْهُ الصَّلَاةُ مِنَ اللَّيْلِ مِنْ وَجَعٍ أَوْ غَيْرِهِ صَلَّى مِنَ النَّهَارِ ثِنْتَيْ عَشْرَةَ رَكْعَةً","en":"She said: When the Prophet (peace be upon him) missed his night prayers due to illness or other reasons, he would pray twelve rak'ahs during the day."},{"id":"sr_m5","src":"muslim","loc_ar":"كتاب صلاة المسافرين وقصرها — رقم الحديث: 725","loc_en":"Book of the Traveler's Prayer — Hadith No. 725","narr_ar":"عَنِ ابْنِ عُمَرَ رَضِيَ اللَّهُ عَنْهُمَا","narr_en":"Narrated by Ibn Umar (may Allah be pleased with them both)","ar":"قَالَ: حَفِظْتُ عَنِ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ رَكْعَتَيْنِ قَبْلَ الظُّهْرِ وَرَكْعَتَيْنِ بَعْدَ الظُّهْرِ وَرَكْعَتَيْنِ بَعْدَ الْمَغْرِبِ وَرَكْعَتَيْنِ بَعْدَ الْعِشَاءِ وَرَكْعَتَيْنِ قَبْلَ الصُّبْحِ","en":"He said: I observed from the Prophet (peace be upon him) two rak'ahs before Dhuhr, two after Dhuhr, two after Maghrib, two after Isha, and two before Fajr."},{"id":"sr_m6","src":"muslim","loc_ar":"كتاب صلاة المسافرين وقصرها — رقم الحديث: 724","loc_en":"Book of the Traveler's Prayer — Hadith No. 724","narr_ar":"عَنْ عَبْدِ اللَّهِ بْنِ شَقِيقٍ عَنْ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا","narr_en":"Narrated by Abdullah ibn Shaqiq from Aisha (may Allah be pleased with her)","ar":"سَأَلْتُ عَائِشَةَ عَنْ صَلَاةِ رَسُولِ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ عَنْ تَطَوُّعِهِ فَقَالَتْ: كَانَ يُصَلِّي قَبْلَ الظُّهْرِ أَرْبَعًا فِي بَيْتِي ثُمَّ يَخْرُجُ فَيُصَلِّي بِالنَّاسِ ثُمَّ يَرْجِعُ إِلَى بَيْتِي فَيُصَلِّي رَكْعَتَيْنِ","en":"I asked Aisha about the voluntary prayer of the Messenger of Allah (peace be upon him). She said: He used to pray four rak'ahs in my house before Dhuhr, then go out and lead the people in prayer, then return to my house and pray two rak'ahs."}]}];
+
+const REVIEWERS = {
+  r1:{name:'Mamoon',    display:'R1', short:'R1', cls:'r1', labelCls:'r1n'},
+  r2:{name:'Omar',      display:'R2', short:'R2', cls:'r2', labelCls:'r2n'},
+  r3:{name:'AbdulAziz', display:'R3', short:'R3', cls:'r3', labelCls:'r3n'},
+  r4:{name:'Yousef',    display:'R4', short:'R4', cls:'r4', labelCls:'r4n'},
+  r5:{name:'Fareed',    display:'R5', short:'R5', cls:'r5', labelCls:'r5n'},
+};
+// Passwords — exact match, case-sensitive
+const REVIEWER_PASSWORDS = {
+  r1:'Mamoon', r2:'Omar', r3:'AbdulAziz', r4:'Yousef', r5:'Fareed'
+};
+const OPTS = [
+  {key:'a',label:'Not Relevant to the Topic',cls:'opt-a'},
+  {key:'b',label:'Partially Relevant',cls:'opt-b'},
+  {key:'c',label:'Relevant but Repeated',cls:'opt-c'},
+  {key:'d',label:'Relevant — Do Not Use in App',cls:'opt-d'},
+  {key:'e',label:'Relevant — Use in the App',cls:'opt-e'},
+];
+
+let currentReviewer=null, currentActIdx=0;
+let votes={r1:{},r2:{},r3:{},r4:{},r5:{}};
+let nameSuggestions={};
+let activeEtabVal='use';
+
+function buildSelector(){
+  const sel=document.getElementById('act-select');
+  ACTIVITIES_DATA.forEach((a,i)=>{
+    const o=document.createElement('option');
+    o.value=i; o.textContent=(i+1)+'. '+a.title_ar; sel.appendChild(o);
+  });
+}
+
+function switchActivity(idx){
+  currentActIdx=parseInt(idx);
+  document.getElementById('act-select').value=idx;
+  document.getElementById('act-progress').textContent=(currentActIdx+1)+' / '+ACTIVITIES_DATA.length;
+  const act=ACTIVITIES_DATA[currentActIdx];
+  document.getElementById('header-act-title').textContent=act.title_ar;
+  document.getElementById('current-name-display').textContent=act.title_ar;
+  buildCards(); renderAll(); renderNamePanel();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function prevActivity(){if(currentActIdx>0)switchActivity(currentActIdx-1);}
+function nextActivity(){if(currentActIdx<ACTIVITIES_DATA.length-1)switchActivity(currentActIdx+1);}
+
+function setupFirebaseListeners(){
+  ['r1','r2','r3','r4','r5'].forEach(r=>{
+    db.ref('v2/votes/'+r).on('value',snap=>{votes[r]=snap.val()||{};renderAll();hideLoding();});
+  });
+  db.ref('v2/name_suggestions').on('value',snap=>{nameSuggestions=snap.val()||{};renderNamePanel();});
+}
+
+db.ref('.info/connected').on('value',snap=>{
+  const on=snap.val()===true;
+  document.getElementById('fb-dot').className='fb-dot'+(on?' on':' err');
+  document.getElementById('fb-lbl').textContent=on?'Firebase Connected':'Reconnecting…';
+  document.getElementById('live-pill').style.display=on?'flex':'none';
+  // Hub status dot
+  const hdot=document.getElementById('hub-dot');
+  const hlbl=document.getElementById('hub-status-lbl');
+  if(hdot){hdot.className='hub-status-dot'+(on?' on':' off');}
+  if(hlbl){hlbl.textContent=on?'Firebase Connected':'Reconnecting…';}
+  const ls=document.getElementById('login-sync');
+  ls.className='login-sync '+(on?'online':'offline');
+  ls.textContent=on?'🟢 Firebase connected — real-time sync active':'🔴 Offline — trying to reconnect…';
+  if(on) hideLoding();
+});
+
+let loadingHidden=false;
+function hideLoding(){
+  if(loadingHidden)return; loadingHidden=true;
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('login-overlay').classList.add('show');
+}
+
+// ── Password prompt ───────────────────────────────────────────────────────
+let pendingReviewer = null;
+const REVIEWER_COLORS = {r1:'#0EA5E9',r2:'#F59E0B',r3:'#EC4899',r4:'#8B5CF6',r5:'#14B8A6'};
+
+function promptPassword(r) {
+  pendingReviewer = r;
+  const cfg = REVIEWERS[r];
+  const icon = document.getElementById('pwd-icon');
+  const title = document.getElementById('pwd-title');
+  const input = document.getElementById('pwd-input');
+  const err = document.getElementById('pwd-error');
+  const btn = document.getElementById('pwd-submit-btn');
+  icon.textContent = cfg.display;
+  icon.style.background = REVIEWER_COLORS[r];
+  title.textContent = 'Enter your name to access ' + cfg.display;
+  input.value = '';
+  err.textContent = '';
+  btn.style.background = REVIEWER_COLORS[r];
+  document.getElementById('pwd-overlay').classList.add('show');
+  setTimeout(() => input.focus(), 100);
+}
+
+function submitPassword() {
+  const input = document.getElementById('pwd-input');
+  const err = document.getElementById('pwd-error');
+  const entered = input.value.trim();
+  if (entered === REVIEWER_PASSWORDS[pendingReviewer]) {
+    document.getElementById('pwd-overlay').classList.remove('show');
+    err.textContent = '';
+    setReviewer(pendingReviewer);
+  } else {
+    err.textContent = '✗ Incorrect name — check spelling and case';
+    input.classList.add('shake');
+    input.value = '';
+    setTimeout(() => input.classList.remove('shake'), 400);
+    input.focus();
+  }
+}
+
+function cancelPassword() {
+  document.getElementById('pwd-overlay').classList.remove('show');
+  document.getElementById('pwd-error').textContent = '';
+  pendingReviewer = null;
+}
+
+function setReviewer(r) {
+  currentReviewer = r;
+  document.getElementById('login-overlay').classList.remove('show');
+  const dot = document.getElementById('badge-dot');
+  const lbl = document.getElementById('badge-label');
+  const colors = {...REVIEWER_COLORS, compare:'#aaa'};
+  dot.style.background = colors[r] || '#aaa';
+  if (r === 'compare') {
+    lbl.textContent = 'Compare View — All Reviewers';
+  } else {
+    const la = {r1:'المراجع الأول',r2:'المراجع الثاني',r3:'المراجع الثالث',r4:'المراجع الرابع',r5:'المراجع الخامس'};
+    lbl.textContent = REVIEWERS[r].display + ' — ' + la[r];
+  }
+  renderAll(); renderNamePanel();
+}
+function showLogin() {
+  document.getElementById('hub-screens').classList.remove('show-sub','show-log');
+  document.getElementById('login-overlay').classList.add('show');
+}
+
+function buildCards(){
+  const act=ACTIVITIES_DATA[currentActIdx];
+  ['quran','bukhari','muslim'].forEach(grp=>{
+    const ctr=document.getElementById('cards-'+grp); ctr.innerHTML='';
+    const srcEvs=act.evidences.filter(e=>e.src===grp);
+    document.getElementById('cards-'+grp+'-wrap').style.display=srcEvs.length?'':'none';
+    const pfx=grp==='quran'?'Q':grp==='bukhari'?'B':'M';
+    srcEvs.forEach((ev,i)=>ctr.appendChild(buildCard(ev,pfx+'-0'+(i+1))));
+  });
+  document.getElementById('cnt-total').textContent=act.evidences.length;
+}
+
+function buildCard(ev,num){
+  const wrap=document.createElement('div'); wrap.className='card unvoted'; wrap.id='card-'+ev.id;
+  const top=document.createElement('div'); top.className='card-top';
+  top.innerHTML=`<div class="card-left"><span class="cnum">${num}</span><div><div class="cref-ar">${ev.loc_ar}</div><div class="cref-en">${ev.loc_en}</div></div></div><div class="card-right"><div class="r-indicators"><div class="r-ind" id="rind-r1-${ev.id}"><div class="rdot"></div>R1</div><div class="r-ind" id="rind-r2-${ev.id}"><div class="rdot"></div>R2</div><div class="r-ind" id="rind-r3-${ev.id}"><div class="rdot"></div>R3</div><div class="r-ind" id="rind-r4-${ev.id}"><div class="rdot"></div>R4</div><div class="r-ind" id="rind-r5-${ev.id}"><div class="rdot"></div>R5</div></div><div class="voted-label" id="vlbl-${ev.id}">✅ Use in App</div></div>`;
+  wrap.appendChild(top);
+  if(ev.narr_ar){const n=document.createElement('div');n.className='narr';n.innerHTML=`<div class="narr-ar">${ev.narr_ar}</div><div class="narr-en">${ev.narr_en}</div>`;wrap.appendChild(n);}
+  const t1=document.createElement('div');t1.className='txt-blk';t1.innerHTML=`<div class="tlbl">Arabic — النص العربي</div><div class="t-ar">${ev.ar}</div>`;wrap.appendChild(t1);
+  const t2=document.createElement('div');t2.className='txt-blk';t2.innerHTML=`<div class="tlbl">English — الترجمة</div><div class="t-en">${ev.en}</div>`;wrap.appendChild(t2);
+  const panel=document.createElement('div');panel.className='vote-panel';panel.id='panel-'+ev.id;
+  panel.innerHTML=`<div class="vote-label-row"><span class="vote-title">YOUR VOTE</span><span class="vote-reset" id="reset-${ev.id}" onclick="resetVote('${ev.id}')">Change vote ↩</span></div><div class="vote-options" id="opts-${ev.id}">${OPTS.map(o=>`<button class="vopt ${o.cls}" id="vopt-${ev.id}-${o.key}" onclick="castVote('${ev.id}','${o.key}')"><span class="vopt-letter">${o.key})</span><span class="vopt-text">${o.label}</span><span class="vopt-check">✓</span></button>`).join('')}</div>`;
+  wrap.appendChild(panel);
+  const cmp=document.createElement('div');cmp.className='compare-votes';cmp.id='cmp-'+ev.id;cmp.style.display='none';wrap.appendChild(cmp);
+  return wrap;
+}
+
+function getActVotes(r){const actId=ACTIVITIES_DATA[currentActIdx].id;return(votes[r]&&votes[r][actId])?votes[r][actId]:{};}
+
+function castVote(evId,optKey){
+  if(!currentReviewer||currentReviewer==='compare')return;
+  const actId=ACTIVITIES_DATA[currentActIdx].id;
+  db.ref('v2/votes/'+currentReviewer+'/'+actId+'/'+evId).set(optKey);
+  showToast('Vote saved — '+OPTS.find(o=>o.key===optKey).label);
+}
+function resetVote(evId){
+  if(!currentReviewer||currentReviewer==='compare')return;
+  const actId=ACTIVITIES_DATA[currentActIdx].id;
+  db.ref('v2/votes/'+currentReviewer+'/'+actId+'/'+evId).remove();
+  showToast('Vote cleared');
+}
+
+function renderAll(){ACTIVITIES_DATA[currentActIdx].evidences.forEach(ev=>renderCard(ev));updateStats();}
+
+function renderCard(ev){
+  const id=ev.id;
+  const av={r1:getActVotes('r1'),r2:getActVotes('r2'),r3:getActVotes('r3'),r4:getActVotes('r4'),r5:getActVotes('r5')};
+  const myVote=currentReviewer&&currentReviewer!=='compare'?(av[currentReviewer][id]||null):null;
+  const r1v=av.r1[id]||null,r2v=av.r2[id]||null,r3v=av.r3[id]||null,r4v=av.r4[id]||null,r5v=av.r5[id]||null;
+  const anyVoted=r1v||r2v||r3v||r4v||r5v;
+  const card=document.getElementById('card-'+id); if(!card)return;
+  const isMyUse=myVote==='e';
+  card.className='card '+(myVote?(isMyUse?'voted-use':'voted'):(anyVoted?'voted':'unvoted'));
+  document.getElementById('vlbl-'+id).style.display=isMyUse?'inline-flex':'none';
+  ['r1','r2','r3','r4','r5'].forEach(r=>{
+    const el=document.getElementById('rind-'+r+'-'+id); if(!el)return;
+    const v=av[r][id];
+    if(v){const opt=OPTS.find(o=>o.key===v);el.className='r-ind voted-'+r;el.title=REVIEWERS[r].display+': '+opt.label;}
+    else{el.className='r-ind';el.title=REVIEWERS[r].display+': No vote yet';}
+  });
+  const panel=document.getElementById('panel-'+id);
+  const resetEl=document.getElementById('reset-'+id);
+  const cmpDiv=document.getElementById('cmp-'+id);
+  if(currentReviewer==='compare'){
+    panel.style.display='none';cmpDiv.style.display='block';
+    cmpDiv.style.padding='9px 13px 11px';cmpDiv.style.borderTop='1px solid #F0F0F0';
+    const cs=getComputedStyle(document.documentElement);
+    const C={'opt-a':{bg:cs.getPropertyValue('--opt-a-bg'),bd:cs.getPropertyValue('--opt-a-border'),tx:cs.getPropertyValue('--opt-a-text')},'opt-b':{bg:cs.getPropertyValue('--opt-b-bg'),bd:cs.getPropertyValue('--opt-b-border'),tx:cs.getPropertyValue('--opt-b-text')},'opt-c':{bg:cs.getPropertyValue('--opt-c-bg'),bd:cs.getPropertyValue('--opt-c-border'),tx:cs.getPropertyValue('--opt-c-text')},'opt-d':{bg:cs.getPropertyValue('--opt-d-bg'),bd:cs.getPropertyValue('--opt-d-border'),tx:cs.getPropertyValue('--opt-d-text')},'opt-e':{bg:cs.getPropertyValue('--opt-e-bg'),bd:cs.getPropertyValue('--opt-e-border'),tx:cs.getPropertyValue('--opt-e-text')}};
+    cmpDiv.innerHTML=['r1','r2','r3','r4','r5'].map(r=>{
+      const vote=av[r][id]; const cfg=REVIEWERS[r]; const opt=vote?OPTS.find(o=>o.key===vote):null;
+      const pill=opt?`<span style="padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;border:1.5px solid ${C[opt.cls].bd};background:${C[opt.cls].bg};color:${C[opt.cls].tx}">${opt.key}) ${opt.label}</span>`:`<span class="cv-none">No vote yet</span>`;
+      return `<div class="cv-row"><span class="cv-name ${cfg.labelCls}">${cfg.display}</span>${pill}</div>`;
+    }).join('');
+    return;
+  }
+  panel.style.display='block'; cmpDiv.style.display='none';
+  OPTS.forEach(o=>{
+    const btn=document.getElementById('vopt-'+id+'-'+o.key); if(!btn)return;
+    btn.className='vopt '+o.cls+(myVote?(o.key===myVote?' selected':' collapsed'):'');
+  });
+  resetEl.className='vote-reset'+(myVote?' show':'');
+}
+
+function updateStats(){
+  const ids=ACTIVITIES_DATA[currentActIdx].evidences.map(e=>e.id);
+  const av={r1:getActVotes('r1'),r2:getActVotes('r2'),r3:getActVotes('r3'),r4:getActVotes('r4'),r5:getActVotes('r5')};
+  document.getElementById('cnt-r1').textContent=ids.filter(id=>av.r1[id]).length;
+  document.getElementById('cnt-r2').textContent=ids.filter(id=>av.r2[id]).length;
+  document.getElementById('cnt-r3').textContent=ids.filter(id=>av.r3[id]).length;
+  document.getElementById('cnt-r4').textContent=ids.filter(id=>av.r4[id]).length;
+  document.getElementById('cnt-r5').textContent=ids.filter(id=>av.r5[id]).length;
+  document.getElementById('cnt-all').textContent=ids.filter(id=>av.r1[id]&&av.r2[id]&&av.r3[id]&&av.r4[id]&&av.r5[id]).length;
+}
+
+function renderNamePanel(){
+  const actId=ACTIVITIES_DATA[currentActIdx].id;
+  const grid=document.getElementById('suggestions-grid'); if(!grid)return;
+  const rvDefs=[{key:'r1',name:'R1',cls:'r1',avatar:'R1'},{key:'r2',name:'R2',cls:'r2',avatar:'R2'},{key:'r3',name:'R3',cls:'r3',avatar:'R3'},{key:'r4',name:'R4',cls:'r4',avatar:'R4'},{key:'r5',name:'R5',cls:'r5',avatar:'R5'}];
+  grid.innerHTML='';
+  rvDefs.forEach(rv=>{
+    const isMe=currentReviewer===rv.key;
+    const val=(nameSuggestions[actId]&&nameSuggestions[actId][rv.key])||'';
+    const row=document.createElement('div'); row.className='suggestion-row';
+    const badge=document.createElement('div'); badge.className='sug-reviewer-badge';
+    badge.innerHTML=`<div class="sug-avatar ${rv.cls}">${rv.avatar}</div><div class="sug-name">${rv.name}</div>`;
+    row.appendChild(badge);
+    const iw=document.createElement('div'); iw.className='sug-input-wrap';
+    if(!isMe){
+      const ro=document.createElement('div'); ro.className='sug-readonly'+(val?` ${rv.cls}-filled`:' empty'); ro.textContent=val||'No suggestion yet'; iw.appendChild(ro);
+    } else {
+      const inp=document.createElement('input'); inp.type='text'; inp.className='sug-input'; inp.id='sug-input-'+rv.key;
+      inp.placeholder='اقترح اسماً مختلفاً للنشاط…'; inp.value=val; inp.maxLength=120;
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter')saveNameSuggestion(rv.key);});
+      const saveBtn=document.createElement('button'); saveBtn.className='sug-save-btn'; saveBtn.id='sug-btn-'+rv.key;
+      saveBtn.textContent='Save'; saveBtn.onclick=()=>saveNameSuggestion(rv.key);
+      const note=document.createElement('div'); note.className='sug-saved-text'; note.id='sug-note-'+rv.key; note.textContent='✓ Saved';
+      iw.appendChild(inp); iw.appendChild(saveBtn); iw.appendChild(note);
+    }
+    row.appendChild(iw); grid.appendChild(row);
+  });
+}
+
+function saveNameSuggestion(rk){
+  if(!currentReviewer||currentReviewer==='compare')return;
+  const inp=document.getElementById('sug-input-'+rk); if(!inp)return;
+  const val=inp.value.trim();
+  const actId=ACTIVITIES_DATA[currentActIdx].id;
+  val?db.ref('v2/name_suggestions/'+actId+'/'+rk).set(val):db.ref('v2/name_suggestions/'+actId+'/'+rk).remove();
+  const btn=document.getElementById('sug-btn-'+rk); const note=document.getElementById('sug-note-'+rk);
+  if(btn){btn.classList.add('saved');btn.textContent='✓';setTimeout(()=>{btn.classList.remove('saved');btn.textContent='Save';},1800);}
+  if(note){note.classList.add('show');setTimeout(()=>note.classList.remove('show'),2500);}
+  showToast(val?'✓ Name suggestion saved':'Suggestion cleared');
+}
+
+function openExport(){document.getElementById('modal-overlay').classList.add('open');renderExport(activeEtabVal);}
+function closeExport(){document.getElementById('modal-overlay').classList.remove('open');}
+function switchEtab(t){
+  activeEtabVal=t;
+  ['use','all','r1','r2','r3','r4','r5'].forEach(x=>{
+    const el=document.getElementById('etab-'+(x==='r1'?'mamoon':x==='r2'?'omar':x));
+    if(el)el.className='etab'+(x===t?' active':'');
+  });
+  renderExport(t);
+}
+function renderExport(t){
+  const act=ACTIVITIES_DATA[currentActIdx];
+  const av={r1:getActVotes('r1'),r2:getActVotes('r2'),r3:getActVotes('r3'),r4:getActVotes('r4'),r5:getActVotes('r5')};
+  const ns=(nameSuggestions[act.id])||{};
+  let result=[];
+  if(t==='use')result=act.evidences.filter(ev=>av.r1[ev.id]==='e'&&av.r2[ev.id]==='e'&&av.r3[ev.id]==='e'&&av.r4[ev.id]==='e'&&av.r5[ev.id]==='e');
+  else if(t==='all')result=act.evidences.filter(ev=>av.r1[ev.id]||av.r2[ev.id]||av.r3[ev.id]||av.r4[ev.id]||av.r5[ev.id]);
+  else result=act.evidences.filter(ev=>av[t][ev.id]);
+  const content=document.getElementById('modal-content');
+  const msgs={use:'No evidences voted "Use in App" by all five reviewers yet.',all:'No votes recorded yet.',r1:'No votes from R1 yet.',r2:'No votes from R2 yet.',r3:'No votes from R3 yet.',r4:'No votes from R4 yet.',r5:'No votes from R5 yet.'};
+  if(!result.length){content.innerHTML=`<div class="empty-exp">${msgs[t]}</div>`;return;}
+  const out={activity:act.id,title_ar:act.title_ar,name_suggestions:{R1:ns.r1||null,R2:ns.r2||null,R3:ns.r3||null,R4:ns.r4||null,R5:ns.r5||null},export_filter:t,evidences:result.map(ev=>({id:ev.id,loc_ar:ev.loc_ar,loc_en:ev.loc_en,text_ar:ev.ar,text_en:ev.en,votes:{r1:av.r1[ev.id]||null,r2:av.r2[ev.id]||null,r3:av.r3[ev.id]||null,r4:av.r4[ev.id]||null,r5:av.r5[ev.id]||null}}))};
+  content.innerHTML='<pre id="json-out">'+JSON.stringify(out,null,2).replace(/</g,'&lt;')+'</pre>';
+}
+function copyJSON(){
+  const pre=document.getElementById('json-out');if(!pre)return;
+  navigator.clipboard.writeText(pre.textContent).then(()=>{const btn=document.querySelector('.mcopy');btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='Copy JSON',2000);});
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeExport();});
+
+let tt;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200);}
+
+const FS_SCALES={s:1,m:1.25,l:1.55};
+function setFontSize(size){
+  document.documentElement.style.setProperty('--scale',FS_SCALES[size]);
+  ['s','m','l'].forEach(k=>document.getElementById('fs-'+k).className='fs-btn sz-'+k+(k===size?' active':''));
+  try{localStorage.setItem('fs_pref',size);}catch(e){}
+}
+try{const saved=localStorage.getItem('fs_pref');if(saved&&FS_SCALES[saved])setFontSize(saved);}catch(e){}
+
+// ── Hub Navigation ────────────────────────────────────────────────────────
+const HUB_CONTENT = {
+  stage1: {
+    title: 'Review Stage 1',
+    render: () => `
+      <button class="reviewer-btn r1" onclick="promptPassword('r1')"><div class="r-avatar">R1</div><div class="r-info"><span class="r-name">Reviewer 1</span><span class="r-role">المراجع الأول</span></div></button>
+      <button class="reviewer-btn r2" onclick="promptPassword('r2')"><div class="r-avatar">R2</div><div class="r-info"><span class="r-name">Reviewer 2</span><span class="r-role">المراجع الثاني</span></div></button>
+      <button class="reviewer-btn r3" onclick="promptPassword('r3')"><div class="r-avatar">R3</div><div class="r-info"><span class="r-name">Reviewer 3</span><span class="r-role">المراجع الثالث</span></div></button>
+      <button class="reviewer-btn r4" onclick="promptPassword('r4')"><div class="r-avatar">R4</div><div class="r-info"><span class="r-name">Reviewer 4</span><span class="r-role">المراجع الرابع</span></div></button>
+      <button class="reviewer-btn r5" onclick="promptPassword('r5')"><div class="r-avatar">R5</div><div class="r-info"><span class="r-name">Reviewer 5</span><span class="r-role">المراجع الخامس</span></div></button>
+      <button class="reviewer-btn compare-btn" onclick="setReviewer('compare')"><div class="r-avatar">⚖</div><div class="r-info"><span class="r-name">Compare All Reviews</span><span class="r-role">VIEW ALL VOTES — المقارنة</span></div></button>`
+  },
+  log: {
+    title: 'Research Log — سجل الأدلة',
+    render: () => `
+      <button class="reviewer-btn compare-btn" style="border-color:#B8860B;color:#B8860B" onclick="openResearchLog()">
+        <div class="r-avatar" style="background:#FFFDE7;color:#B8860B;font-size:18px">📑</div>
+        <div class="r-info">
+          <span class="r-name" style="color:#B8860B">Evidence Research Log</span>
+          <span class="r-role">سجل التركيز ومبررات اختيار الأدلة</span>
+        </div>
+      </button>
+      <div style="padding:14px;background:rgba(255,253,231,.6);border-radius:10px;border:1px solid #F9E57A;font-size:12px;color:#7C5A00;line-height:1.7;direction:rtl;text-align:right">
+        يوثّق هذا السجل لكل نشاط مكتمل: التركيز المفهوم من القائمة، ومبررات اختيار كل دليل، وما تم استبعاده ولماذا.
+      </div>`
+  },
+  stage2: {
+    title: 'Review Stage 2',
+    render: () => `
+      <div class="hub-coming">
+        <div class="hub-coming-icon">🔒</div>
+        <div class="hub-coming-title">قريباً</div>
+        <div class="hub-coming-sub">لم يتم تفعيل المرحلة الثانية بعد<br>ستُفتح بعد اكتمال المرحلة الأولى</div>
+      </div>`
+  },
+  admin: {
+    title: 'Admin Panel',
+    render: () => `
+      <button class="admin-entry-btn" onclick="openAdminPrompt()">
+        <div class="ae-icon">🛡</div>
+        <div class="ae-label">
+          <span class="ae-name">Admin Panel</span>
+          <span class="ae-sub">RESET & DATABASE MANAGEMENT</span>
+        </div>
+      </button>
+      <div style="padding:12px;background:rgba(239,68,68,.08);border-radius:10px;border:1px solid rgba(239,68,68,.2);font-size:11px;color:rgba(252,165,165,.7);line-height:1.6;text-align:center">
+        Password protected. Admin access only.
+      </div>`
+  }
+};
+
+function hubNav(section) {
+  const screens = document.getElementById('hub-screens');
+  if (section === 'log') {
+    screens.classList.remove('show-sub');
+    screens.classList.add('show-log');
+    return;
+  }
+  const cfg = HUB_CONTENT[section];
+  if (!cfg) return;
+  document.getElementById('hub-sub-title').textContent = cfg.title;
+  document.getElementById('hub-sub-body').innerHTML = cfg.render();
+  screens.classList.remove('show-log');
+  screens.classList.add('show-sub');
+}
+
+function hubBack() {
+  const screens = document.getElementById('hub-screens');
+  screens.classList.remove('show-sub');
+  screens.classList.remove('show-log');
+}
+
+function openResearchLog() { hubNav('log'); }
+
+// ── Admin Panel ───────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'Qwer@1234';
+const ADMIN_REVIEWERS = [
+  {key:'r1', name:'Reviewer 1', color:'#0EA5E9'},
+  {key:'r2', name:'Reviewer 2', color:'#F59E0B'},
+  {key:'r3', name:'Reviewer 3', color:'#EC4899'},
+  {key:'r4', name:'Reviewer 4', color:'#8B5CF6'},
+  {key:'r5', name:'Reviewer 5', color:'#14B8A6'},
+];
+
+function openAdminPrompt() {
+  document.getElementById('login-overlay').classList.remove('show');
+  const inp = document.getElementById('admin-pwd-input');
+  inp.value = '';
+  document.getElementById('admin-pwd-error').textContent = '';
+  document.getElementById('admin-pwd-overlay').classList.add('show');
+  setTimeout(() => inp.focus(), 100);
+}
+
+function cancelAdminPrompt() {
+  document.getElementById('admin-pwd-overlay').classList.remove('show');
+  document.getElementById('login-overlay').classList.add('show');
+}
+
+function submitAdminPassword() {
+  const inp = document.getElementById('admin-pwd-input');
+  const err = document.getElementById('admin-pwd-error');
+  if (inp.value === ADMIN_PASSWORD) {
+    document.getElementById('admin-pwd-overlay').classList.remove('show');
+    inp.value = '';
+    openAdminPanel();
+  } else {
+    err.textContent = '✗ Incorrect password';
+    inp.classList.add('shake');
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('shake'), 400);
+    inp.focus();
+  }
+}
+
+function openAdminPanel() {
+  renderAdminRows();
+  document.getElementById('admin-success-msg').textContent = '';
+  document.getElementById('admin-overlay').classList.add('show');
+}
+
+function closeAdmin() {
+  document.getElementById('admin-overlay').classList.remove('show');
+  document.getElementById('login-overlay').classList.add('show');
+}
+
+function renderAdminRows() {
+  const container = document.getElementById('admin-reviewer-rows');
+  container.innerHTML = '';
+  ADMIN_REVIEWERS.forEach(rv => {
+    // Count votes across all activities for this reviewer
+    let total = 0;
+    Object.values(votes[rv.key] || {}).forEach(actVotes => {
+      total += Object.keys(actVotes).length;
+    });
+    const row = document.createElement('div');
+    row.className = 'admin-reviewer-row';
+    row.innerHTML = `
+      <div class="admin-reviewer-info">
+        <div class="admin-reviewer-dot" style="background:${rv.color}"></div>
+        <div>
+          <div class="admin-reviewer-name">${rv.name}</div>
+          <div class="admin-reviewer-count">${total} vote${total !== 1 ? 's' : ''} recorded</div>
+        </div>
+      </div>
+      <button class="admin-reset-btn" onclick="adminResetReviewer('${rv.key}','${rv.name}')">Reset</button>`;
+    container.appendChild(row);
+  });
+}
+
+function adminResetReviewer(rKey, rName) {
+  if (!confirm(`Reset ALL votes and name suggestions for ${rName}?\n\nThis cannot be undone.`)) return;
+  const tasks = [
+    db.ref('v2/votes/' + rKey).remove(),
+    db.ref('v2/name_suggestions').once('value').then(snap => {
+      const data = snap.val() || {};
+      const updates = {};
+      Object.keys(data).forEach(actId => {
+        if (data[actId] && data[actId][rKey] !== undefined) {
+          updates['v2/name_suggestions/' + actId + '/' + rKey] = null;
+        }
+      });
+      if (Object.keys(updates).length) return db.ref().update(updates);
+    })
+  ];
+  Promise.all(tasks).then(() => {
+    showAdminSuccess(`✓ ${rName} reset successfully`);
+    renderAdminRows();
+    showToast(`${rName} data cleared from database`);
+  }).catch(e => showAdminSuccess('Error: ' + e.message));
+}
+
+function adminResetAll() {
+  if (!confirm('FULL DATABASE WIPE\n\nThis will permanently delete ALL votes and ALL name suggestions from ALL reviewers for ALL activities.\n\nAre you absolutely sure?')) return;
+  if (!confirm('Second confirmation required.\n\nDelete everything?')) return;
+  const tasks = [];
+  // Delete each reviewer's votes individually (rules don't allow deleting parent v2/ node)
+  ['r1','r2','r3','r4','r5'].forEach(r => {
+    tasks.push(db.ref('v2/votes/' + r).remove());
+  });
+  // Delete all name suggestions activity by activity
+  tasks.push(
+    db.ref('v2/name_suggestions').once('value').then(snap => {
+      const data = snap.val() || {};
+      const removes = Object.keys(data).map(actId =>
+        db.ref('v2/name_suggestions/' + actId).remove()
+      );
+      return Promise.all(removes);
+    })
+  );
+  Promise.all(tasks).then(() => {
+    showAdminSuccess('✓ Full database wiped — all data cleared');
+    renderAdminRows();
+    showToast('Full database reset complete');
+  }).catch(e => showAdminSuccess('Error: ' + e.message));
+}
+
+let adminMsgTimer;
+function showAdminSuccess(msg) {
+  const el = document.getElementById('admin-success-msg');
+  el.textContent = msg;
+  clearTimeout(adminMsgTimer);
+  adminMsgTimer = setTimeout(() => el.textContent = '', 4000);
+}
+
+buildSelector();
+switchActivity(0);
+setupFirebaseListeners();
+// Give Firebase 6s to connect before forcing the login screen open
+setTimeout(hideLoding, 6000);
+</script>
+</body>
+</html>
