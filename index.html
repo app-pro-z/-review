@@ -597,7 +597,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
             <div class="hub-card-icon">📋</div>
             <div class="hub-card-text">
               <div class="hub-card-title">Review Stage 1</div>
-              <div class="hub-card-sub">Reviewers R1–R5 + Compare All</div>
+              <div class="hub-card-sub">المراجعة الأولى — المراجعون R1 إلى R5 والمقارنة</div>
             </div>
             <div class="hub-card-arrow">›</div>
             <span class="hub-card-badge">ACTIVE</span>
@@ -605,8 +605,8 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
           <div class="hub-card c-gold" onclick="hubNav('log')">
             <div class="hub-card-icon">📖</div>
             <div class="hub-card-text">
-              <div class="hub-card-title">Evidences Research Log</div>
-              <div class="hub-card-sub">سجل بحث الأدلة والتركيز</div>
+              <div class="hub-card-title">Research Log</div>
+              <div class="hub-card-sub">سجل الأدلة — التركيز ومبررات الاختيار</div>
             </div>
             <div class="hub-card-arrow">›</div>
             <span class="hub-card-badge">4 أنشطة</span>
@@ -654,7 +654,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
       <div class="hub-screen hub-log" id="hub-log-screen">
         <div class="hub-sub-header">
           <div class="hub-back-btn" onclick="hubBack()">‹</div>
-          <div class="hub-sub-title" style="font-size:16px">سجل بحث الأدلة</div>
+          <div class="hub-sub-title" style="font-size:16px">Research Log — سجل الأدلة</div>
         </div>
         <div class="log-view-wrapper">
           <div class="log-view">
@@ -1593,7 +1593,7 @@ function openDesktopModal(section) {
   body.style.cssText  = '';
 
   if (section === 'log') {
-    title.textContent = 'سجل بحث الأدلة';
+    title.textContent = 'Research Log — سجل الأدلة';
 
     const LOG_DATA = [
       {
@@ -1630,7 +1630,7 @@ function openDesktopModal(section) {
       }
     ];
 
-    function renderLogList() {
+    window.renderLogList = function() {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:9px">
           <div style="padding:10px 14px;background:#FFFDE7;border:1.5px solid #F9E57A;border-radius:12px;direction:rtl;text-align:right">
