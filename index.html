@@ -568,6 +568,134 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
 .current-name-value{font-family:'Amiri',serif;font-size:20px;color:var(--text)}
 .suggestions-grid{display:flex;flex-direction:column;gap:8px}
 
+/* ══ STAGE 2 SELECTION ══ */
+.s2-bar{display:none;align-items:center;justify-content:space-between;gap:10px;padding:9px 16px;background:linear-gradient(135deg,#0D47A1,#4A148C);direction:ltr;flex-wrap:wrap}
+.s2-bar.active{display:flex}
+.s2-bar-left{display:flex;align-items:center;gap:8px}
+.s2-admin-dot{width:8px;height:8px;border-radius:50%;background:#FDE047;flex-shrink:0}
+.s2-bar-title{font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px}
+.s2-count{font-size:11px;font-weight:700;color:rgba(255,255,255,.7)}
+.s2-advance-btn{padding:7px 16px;border-radius:9px;border:none;background:#FDE047;color:#1A1A1A;font-size:12px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;transition:all .2s}
+.s2-advance-btn:hover{background:#FEF08A}
+.s2-advance-btn:disabled{opacity:.4;cursor:not-allowed}
+.s2-cancel-btn{padding:7px 12px;border-radius:9px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif}
+.s2-cancel-btn:hover{background:rgba(255,255,255,.1)}
+
+/* Stage 2 checkbox on each card */
+.s2-check-wrap{display:none;align-items:center;justify-content:center;padding:0 4px}
+body.s2-mode .s2-check-wrap{display:flex}
+.s2-checkbox{width:20px;height:20px;border-radius:5px;border:2px solid #CBD5E1;cursor:pointer;appearance:none;-webkit-appearance:none;background:#fff;transition:all .15s;flex-shrink:0}
+.s2-checkbox:checked{background:#0D47A1;border-color:#0D47A1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M13.485 1.431a1.473 1.473 0 0 0-2.104 0l-6.073 6.0-2.427-2.427a1.473 1.473 0 0 0-2.104 2.104l3.479 3.479a1.473 1.473 0 0 0 2.104 0l7.125-7.125a1.473 1.473 0 0 0 0-2.031z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:12px}
+.s2-checkbox:hover:not(:checked){border-color:#0D47A1}
+
+/* Stage 2 badge on evidence cards */
+.s2-badge{display:none;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;background:linear-gradient(135deg,#0D47A1,#4A148C);color:#fff;border:none;white-space:nowrap;flex-shrink:0}
+.card.s2-selected .s2-badge{display:inline-flex}
+.card.s2-selected{border-color:#0D47A1 !important;box-shadow:0 0 0 2px rgba(13,71,161,.2) !important}
+.card.s2-selected .card-top{background:linear-gradient(135deg,rgba(13,71,161,.06),rgba(74,21,140,.04))}
+
+/* ══════════════════════════════════════════════
+   STAGE 2 REVIEW TOOL
+══════════════════════════════════════════════ */
+.s2-page{display:none;position:fixed;inset:0;background:#F0F4F8;z-index:500;flex-direction:column;overflow:hidden}
+.s2-page.open{display:flex}
+
+/* S2 Header */
+.s2-header{background:linear-gradient(135deg,#1a237e,#4A148C 60%,#0D47A1);padding:16px 24px 14px;flex-shrink:0}
+.s2-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.s2-header-title{font-family:'Amiri',serif;font-size:22px;color:#fff}
+.s2-header-sub{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase}
+.s2-exit-btn{padding:6px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;transition:all .15s}
+.s2-exit-btn:hover{background:rgba(255,255,255,.15)}
+
+/* S2 Who badge */
+.s2-who-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.s2-who-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(255,255,255,.12);border-radius:999px;border:1px solid rgba(255,255,255,.2);font-size:11px;font-weight:700;color:#fff}
+.s2-wd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.s2-switch{cursor:pointer;text-decoration:underline;opacity:.7;font-size:10px;color:rgba(255,255,255,.7)}
+.s2-switch:hover{opacity:1}
+
+/* S2 Stat bar */
+.s2-stat-bar{display:flex;align-items:center;gap:8px;padding:7px 16px;background:#fff;border-bottom:1px solid #E5E7EB;direction:ltr;flex-wrap:nowrap;overflow-x:auto}
+.s2-stat-bar::-webkit-scrollbar{display:none}
+.s2-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;border:1.5px solid;font-size:11px;font-weight:700;white-space:nowrap}
+.s2-pill .n{font-size:12px}
+.s2-pill.p1{border-color:#7C3AED;color:#7C3AED}
+.s2-pill.p2{border-color:#DB2777;color:#DB2777}
+.s2-pill.p3{border-color:#0369A1;color:#0369A1}
+.s2-pill.pall{border-color:#059669;color:#065F46;background:#D1FAE5}
+
+/* S2 Toolbar */
+.s2-toolbar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border-bottom:1.5px solid #E5E7EB;direction:ltr;flex-wrap:wrap}
+.s2-act-select{flex:1;min-width:160px;padding:6px 10px;border-radius:8px;border:1.5px solid #E5E7EB;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;color:#1A1A1A;background:#fff;cursor:pointer}
+.s2-nav-btn{padding:6px 12px;border-radius:8px;border:1.5px solid #E5E7EB;background:#fff;font-family:'Lato',sans-serif;font-size:12px;font-weight:700;cursor:pointer;color:#1A1A1A;white-space:nowrap;transition:all .15s}
+.s2-nav-btn:hover{background:#F8FAFC}
+.s2-prog{font-size:11px;color:#94A3B8;white-space:nowrap}
+.s2-compare-btn{padding:6px 13px;border-radius:8px;border:1.5px solid #4A148C;color:#4A148C;background:#fff;font-family:'Lato',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.s2-compare-btn:hover{background:#4A148C;color:#fff}
+.s2-compare-btn.active{background:#4A148C;color:#fff}
+
+/* S2 Main content */
+.s2-content{flex:1;overflow-y:auto;padding:16px 16px 40px;max-width:820px;margin:0 auto;width:100%}
+.s2-content::-webkit-scrollbar{width:4px}
+.s2-content::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px}
+
+/* S2 Empty state */
+.s2-empty{text-align:center;padding:48px 24px;color:#94A3B8}
+.s2-empty-icon{font-size:44px;margin-bottom:14px;opacity:.4}
+.s2-empty-title{font-size:18px;font-weight:700;margin-bottom:8px;color:#374151}
+.s2-empty-sub{font-size:13px;line-height:1.7}
+
+/* S2 Evidence card */
+.s2-card{background:#fff;border-radius:14px;border:1.5px solid #E5E7EB;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06);transition:border-color .2s}
+.s2-card.all-checked{border-color:#059669;box-shadow:0 2px 12px rgba(5,150,105,.15)}
+.s2-card-top{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #F0F0F0;direction:ltr;flex-wrap:wrap;gap:8px}
+.s2-card-left{display:flex;align-items:center;gap:10px}
+.s2-cnum{font-size:10px;font-weight:700;color:#CBD5E1;letter-spacing:1px}
+.s2-ref-ar{font-family:'Amiri',serif;font-size:16px;font-weight:700;direction:rtl;color:#1A1A1A}
+.s2-ref-en{font-size:11px;color:#94A3B8}
+.s2-card-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.s2-r-ind{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;border:1.5px solid #E5E7EB;color:#CBD5E1;background:#fff;white-space:nowrap}
+.s2-r-ind .sdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.s2-r-ind.p1v{border-color:#7C3AED;color:#7C3AED;background:#F5F3FF}
+.s2-r-ind.p2v{border-color:#DB2777;color:#DB2777;background:#FDF2F8}
+.s2-r-ind.p3v{border-color:#0369A1;color:#0369A1;background:#EFF6FF}
+.s2-done-badge{display:none;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7}
+.s2-card.all-checked .s2-done-badge{display:inline-flex}
+
+/* S2 Text blocks */
+.s2-txt{padding:10px 14px;border-bottom:1px solid #F8FAFC}
+.s2-txt.ar{direction:rtl;text-align:right}
+.s2-txt.en{color:#555;font-style:italic}
+.s2-txt-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#CBD5E1;margin-bottom:4px}
+.s2-txt-body{font-family:'Amiri',serif;font-size:17px;line-height:2}
+.s2-txt.en .s2-txt-body{font-family:'Lato',sans-serif;font-size:13px;line-height:1.7}
+
+/* S2 Checklist */
+.s2-checklist{padding:12px 14px 14px;direction:ltr}
+.s2-checklist-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94A3B8;margin-bottom:10px}
+.s2-check-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;border:1.5px solid #E5E7EB;margin-bottom:6px;cursor:pointer;transition:all .15s;user-select:none}
+.s2-check-row:hover{background:#F8FAFC;border-color:#CBD5E1}
+.s2-check-row.checked{background:#F0FDF4;border-color:#6EE7B7}
+.s2-check-row.disabled{cursor:default;opacity:.6}
+.s2-check-box{width:18px;height:18px;border-radius:5px;border:2px solid #CBD5E1;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;background:#fff}
+.s2-check-row.checked .s2-check-box{background:#059669;border-color:#059669;color:#fff}
+.s2-check-label{font-size:13px;font-weight:600;color:#374151;flex:1}
+.s2-check-row.checked .s2-check-label{color:#065F46}
+.s2-reviewers-row{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.s2-mini-pill{padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid}
+
+/* S2 Compare mode */
+.s2-compare-grid{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-top:1px solid #F0F0F0}
+.s2-compare-row{display:flex;align-items:center;justify-content:space-between;gap:8px;direction:ltr;font-size:12px}
+.s2-compare-name{font-weight:700;min-width:32px}
+.s2-compare-checks{display:flex;gap:6px;flex-wrap:wrap}
+.s2-mini-check{padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;border:1.5px solid #E5E7EB;color:#94A3B8;background:#fff;white-space:nowrap}
+.s2-mini-check.done{border-color:#059669;background:#D1FAE5;color:#065F46}
+
+/* S2 Login sub-screen */
+.s2-login{position:fixed;inset:0;background:linear-gradient(160deg,#0a1628 0%,#1a237e 55%,#1a0533 100%);display:flex;align-items:center;justify-content:center;z-index:600}
+
 </style>
 </head>
 <body>
@@ -1076,6 +1204,17 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
   </div>
 </div>
 
+<div class="s2-bar" id="s2-admin-bar">
+  <div class="s2-bar-left">
+    <div class="s2-admin-dot"></div>
+    <span class="s2-bar-title">🔒 ADMIN — Stage 2 Selection Mode</span>
+    <span class="s2-count" id="s2-count">0 selected</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="s2-cancel-btn" onclick="exitStage2Mode()">Cancel</button>
+    <button class="s2-advance-btn" id="s2-advance-btn" onclick="advanceToStage2()" disabled>Advance Selected →</button>
+  </div>
+</div>
 <div class="act-selector-bar">
   <div class="act-selector-inner">
     <span class="act-selector-label">ACTIVITY</span>
@@ -1102,7 +1241,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
     <button class="fs-btn sz-m" id="fs-m" onclick="setFontSize('m')" title="Medium">A</button>
     <button class="fs-btn sz-l" id="fs-l" onclick="setFontSize('l')" title="Large">A</button>
   </div>
-  <button class="tbtn sw" onclick="showLogin()">Switch</button>
+  <button class="tbtn sw" onclick="showLogin()">Switch</button><button class="tbtn" id="s2-select-btn" style="display:none;border-color:#0D47A1;color:#0D47A1" onclick="promptStage2Mode()">🔒 Select for Stage 2</button>
   
 </div>
 
@@ -1159,6 +1298,9 @@ const OPTS = [
 
 let currentReviewer=null, currentActIdx=0;
 let votes={r1:{},r2:{},r3:{},r4:{},r5:{}};
+let stage2Data={};
+let stage2Mode=false;
+let stage2Selected=new Set();
 let nameSuggestions={};
 let activeEtabVal='use';
 
@@ -1188,6 +1330,7 @@ function setupFirebaseListeners(){
     db.ref('v2/votes/'+r).on('value',snap=>{votes[r]=snap.val()||{};renderAll();hideLoding();});
   });
   db.ref('v2/name_suggestions').on('value',snap=>{nameSuggestions=snap.val()||{};renderNamePanel();});
+  db.ref('v2/stage2').on('value',snap=>{stage2Data=snap.val()||{};renderAll();});
 }
 
 db.ref('.info/connected').on('value',snap=>{
@@ -1243,6 +1386,26 @@ function submitPassword() {
   const input = document.getElementById('pwd-input');
   const err = document.getElementById('pwd-error');
   const entered = input.value.trim();
+
+  // Stage 2 admin mode
+  if (window._stage2PwdMode) {
+    window._stage2PwdMode = false;
+    if (entered === STAGE2_ADMIN_PWD) {
+      document.getElementById('pwd-overlay').classList.remove('show');
+      input.value = '';
+      err.textContent = '';
+      enterStage2Mode();
+    } else {
+      err.textContent = '✗ Incorrect password';
+      input.classList.add('shake');
+      input.value = '';
+      setTimeout(() => input.classList.remove('shake'), 400);
+      input.focus();
+    }
+    return;
+  }
+
+  // Normal reviewer login
   if (entered === REVIEWER_PASSWORDS[pendingReviewer]) {
     document.getElementById('pwd-overlay').classList.remove('show');
     err.textContent = '';
@@ -1257,10 +1420,15 @@ function submitPassword() {
 }
 
 function cancelPassword() {
+  const wasS2 = window._s2LoginPending || false;
+  window._stage2PwdMode = false;
+  window._s2LoginPending = false;
   document.getElementById('pwd-overlay').classList.remove('show');
   document.getElementById('pwd-error').textContent = '';
-  // On desktop, reopen the Stage 1 modal; on mobile, show the login hub
-  if (window.innerWidth >= 700) {
+  if (wasS2) {
+    if (window.innerWidth >= 700) { openDesktopModal('stage2'); }
+    else { hubNav('stage2'); }
+  } else if (window.innerWidth >= 700) {
     openDesktopModal('stage1');
   } else {
     document.getElementById('login-overlay').classList.add('show');
@@ -1289,6 +1457,8 @@ function setReviewer(r) {
     lbl.textContent = REVIEWERS[r].display + ' — ' + la[r];
   }
   renderAll(); renderNamePanel();
+  const s2btn=document.getElementById('s2-select-btn');
+  if(s2btn) s2btn.style.display=(r==='compare'?'inline-flex':'none');
 }
 function showLogin() {
   document.getElementById('hub-screens').classList.remove('show-sub','show-log');
@@ -1311,7 +1481,7 @@ function buildCards(){
 function buildCard(ev,num){
   const wrap=document.createElement('div'); wrap.className='card unvoted'; wrap.id='card-'+ev.id;
   const top=document.createElement('div'); top.className='card-top';
-  top.innerHTML=`<div class="card-left"><span class="cnum">${num}</span><div><div class="cref-ar">${ev.loc_ar}</div><div class="cref-en">${ev.loc_en}</div></div></div><div class="card-right"><div class="r-indicators"><div class="r-ind" id="rind-r1-${ev.id}"><div class="rdot"></div>R1</div><div class="r-ind" id="rind-r2-${ev.id}"><div class="rdot"></div>R2</div><div class="r-ind" id="rind-r3-${ev.id}"><div class="rdot"></div>R3</div><div class="r-ind" id="rind-r4-${ev.id}"><div class="rdot"></div>R4</div><div class="r-ind" id="rind-r5-${ev.id}"><div class="rdot"></div>R5</div></div><div class="voted-label" id="vlbl-${ev.id}">✅ Use in App</div></div>`;
+  top.innerHTML=`<div class="card-left"><div class="s2-check-wrap"><input type="checkbox" class="s2-checkbox" id="s2cb-${ev.id}" onchange="toggleS2('${ev.id}',this.checked)"></div><span class="cnum">${num}</span><div><div class="cref-ar">${ev.loc_ar}</div><div class="cref-en">${ev.loc_en}</div></div></div><div class="card-right"><div class="r-indicators"><div class="r-ind" id="rind-r1-${ev.id}"><div class="rdot"></div>R1</div><div class="r-ind" id="rind-r2-${ev.id}"><div class="rdot"></div>R2</div><div class="r-ind" id="rind-r3-${ev.id}"><div class="rdot"></div>R3</div><div class="r-ind" id="rind-r4-${ev.id}"><div class="rdot"></div>R4</div><div class="r-ind" id="rind-r5-${ev.id}"><div class="rdot"></div>R5</div></div><div class="s2-badge" id="s2badge-${ev.id}">🔒 Stage 2</div><div class="voted-label" id="vlbl-${ev.id}">✅ Use in App</div></div>`;
   wrap.appendChild(top);
   if(ev.narr_ar){const n=document.createElement('div');n.className='narr';n.innerHTML=`<div class="narr-ar">${ev.narr_ar}</div><div class="narr-en">${ev.narr_en}</div>`;wrap.appendChild(n);}
   const t1=document.createElement('div');t1.className='txt-blk';t1.innerHTML=`<div class="tlbl">Arabic — النص العربي</div><div class="t-ar">${ev.ar}</div>`;wrap.appendChild(t1);
@@ -1348,7 +1518,16 @@ function renderCard(ev){
   const anyVoted=r1v||r2v||r3v||r4v||r5v;
   const card=document.getElementById('card-'+id); if(!card)return;
   const isMyUse=myVote==='e';
-  card.className='card '+(myVote?(isMyUse?'voted-use':'voted'):(anyVoted?'voted':'unvoted'));
+  const actId2=ACTIVITIES_DATA[currentActIdx].id;
+  const isS2=(stage2Data[actId2]&&stage2Data[actId2][id])?true:false;
+  card.className='card '+(isS2?'s2-selected ':'')+(myVote?(isMyUse?'voted-use':'voted'):(anyVoted?'voted':'unvoted'));
+  const s2badge=document.getElementById('s2badge-'+id);
+  if(s2badge) s2badge.style.display=isS2?'inline-flex':'none';
+  const s2cb=document.getElementById('s2cb-'+id);
+  if(s2cb){
+    s2cb.checked=stage2Selected.has(id)||isS2;
+    s2cb.disabled=isS2; // already advanced — lock it
+  }
   document.getElementById('vlbl-'+id).style.display=isMyUse?'inline-flex':'none';
   ['r1','r2','r3','r4','r5'].forEach(r=>{
     const el=document.getElementById('rind-'+r+'-'+id); if(!el)return;
@@ -1532,13 +1711,24 @@ const HUB_CONTENT = {
       </div>`
   },
   stage2: {
-    title: 'Review Stage 2',
+    title: 'Review Stage 2 — المرحلة الثانية',
     render: () => `
-      <div class="hub-coming">
-        <div class="hub-coming-icon">🔒</div>
-        <div class="hub-coming-title">قريباً</div>
-        <div class="hub-coming-sub">لم يتم تفعيل المرحلة الثانية بعد<br>ستُفتح بعد اكتمال المرحلة الأولى</div>
-      </div>`
+      <button class="reviewer-btn" style="border-color:#7C3AED;color:#7C3AED;background:#fff" onclick="promptS2Password('s2r1')">
+        <div class="r-avatar" style="background:#F5F3FF;color:#7C3AED">S1</div>
+        <div class="r-info"><span class="r-name" style="color:#7C3AED">Stage 2 — Reviewer 1</span><span class="r-role">المراجع الأول — المرحلة الثانية</span></div>
+      </button>
+      <button class="reviewer-btn" style="border-color:#DB2777;color:#DB2777;background:#fff" onclick="promptS2Password('s2r2')">
+        <div class="r-avatar" style="background:#FDF2F8;color:#DB2777">S2</div>
+        <div class="r-info"><span class="r-name" style="color:#DB2777">Stage 2 — Reviewer 2</span><span class="r-role">المراجع الثاني — المرحلة الثانية</span></div>
+      </button>
+      <button class="reviewer-btn" style="border-color:#0369A1;color:#0369A1;background:#fff" onclick="promptS2Password('s2r3')">
+        <div class="r-avatar" style="background:#EFF6FF;color:#0369A1">S3</div>
+        <div class="r-info"><span class="r-name" style="color:#0369A1">Stage 2 — Reviewer 3</span><span class="r-role">المراجع الثالث — المرحلة الثانية</span></div>
+      </button>
+      <button class="reviewer-btn compare-btn" onclick="promptS2Password('s2compare')">
+        <div class="r-avatar">⚖</div>
+        <div class="r-info"><span class="r-name">Compare All Results</span><span class="r-role">VIEW ALL CHECKS — مقارنة المرحلة الثانية</span></div>
+      </button>`
   },
   admin: {
     title: 'Admin Panel',
@@ -1713,7 +1903,7 @@ function openDesktopModal(section) {
     body.innerHTML = cfg.render();
     if (section === 'stage2') {
       const coming = body.querySelector('.hub-coming');
-      if (coming) coming.style.color = '#374151';
+      if (coming) { coming.style.color = '#374151'; }
     }
   }
 
@@ -1864,11 +2054,579 @@ function showAdminSuccess(msg) {
   adminMsgTimer = setTimeout(() => el.textContent = '', 4000);
 }
 
+// ── Stage 2 Selection ────────────────────────────────────────────────────
+const STAGE2_ADMIN_PWD = 'Qwer@1234';
+
+function promptStage2Mode(){
+  // Use the reviewer pwd-overlay with custom styling
+  const overlay = document.getElementById('pwd-overlay');
+  const icon    = document.getElementById('pwd-icon');
+  const title   = document.getElementById('pwd-title');
+  const input   = document.getElementById('pwd-input');
+  const err     = document.getElementById('pwd-error');
+  const btn     = document.getElementById('pwd-submit-btn');
+  icon.textContent  = '🔒';
+  icon.style.background = 'linear-gradient(135deg,#0D47A1,#4A148C)';
+  title.textContent = 'Admin: Enter password to select for Stage 2';
+  input.value = '';
+  err.textContent = '';
+  btn.style.background = '#0D47A1';
+  // Flag so submitPassword knows this is Stage 2 mode
+  window._stage2PwdMode = true;
+  overlay.classList.add('show');
+  setTimeout(()=>input.focus(), 120);
+}
+
+function enterStage2Mode(){
+  stage2Mode = true;
+  stage2Selected.clear();
+  document.getElementById('s2-admin-bar').classList.add('active');
+  // Add s2-mode to body so checkboxes show regardless of container nesting
+  document.body.classList.add('s2-mode');
+  updateS2Count();
+  renderAll();
+  showToast('Stage 2 selection mode — tick evidences then click Advance');
+}
+
+function exitStage2Mode(){
+  stage2Mode = false;
+  stage2Selected.clear();
+  document.getElementById('s2-admin-bar').classList.remove('active');
+  document.body.classList.remove('s2-mode');
+  renderAll();
+}
+
+function toggleS2(evId, checked){
+  if(checked) stage2Selected.add(evId);
+  else stage2Selected.delete(evId);
+  updateS2Count();
+}
+
+function updateS2Count(){
+  const n = stage2Selected.size;
+  document.getElementById('s2-count').textContent = n + ' selected';
+  document.getElementById('s2-advance-btn').disabled = (n === 0);
+}
+
+function advanceToStage2(){
+  if(stage2Selected.size === 0) return;
+  const actId = ACTIVITIES_DATA[currentActIdx].id;
+  const updates = {};
+  stage2Selected.forEach(evId => {
+    updates['v2/stage2/' + actId + '/' + evId] = true;
+  });
+  db.ref().update(updates).then(() => {
+    showToast(stage2Selected.size + ' evidence(s) advanced to Stage 2 ✓');
+    exitStage2Mode();
+  }).catch(e => showToast('Error: ' + e.message));
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// STAGE 2 REVIEW SYSTEM
+// ══════════════════════════════════════════════════════════════════════
+
+const S2_REVIEWERS = {
+  s2r1:{ name:'S2-R1', display:'S2-R1', color:'#7C3AED', labelCls:'p1' },
+  s2r2:{ name:'S2-R2', display:'S2-R2', color:'#DB2777', labelCls:'p2' },
+  s2r3:{ name:'S2-R3', display:'S2-R3', color:'#0369A1', labelCls:'p3' },
+};
+
+// Passwords — assign your own names here (same mechanic as Stage 1)
+const S2_PASSWORDS = { s2r1:'S2R1', s2r2:'S2R2', s2r3:'S2R3', s2compare:'' };
+
+const S2_CHECKS = [
+  { key:'ref',   label:'Verify Reference' },
+  { key:'ar',    label:'Verify Arabic Text' },
+  { key:'trans', label:'Accept Translation' },
+];
+
+let s2CurrentReviewer = null;  // 's2r1'|'s2r2'|'s2r3'|'s2compare'
+let s2CurrentActIdx   = 0;
+let s2CompareMode     = false;
+let s2Votes           = { s2r1:{}, s2r2:{}, s2r3:{} }; // {actId:{evId:{ref:true,ar:false,...}}}
+let s2PendingReviewer = null;
+
+// ── Firebase listeners ────────────────────────────────────────────────
+function setupStage2Listeners(){
+  ['s2r1','s2r2','s2r3'].forEach(r=>{
+    db.ref('v2/s2votes/'+r).on('value', snap=>{
+      s2Votes[r] = snap.val()||{};
+      if(document.getElementById('s2-page').classList.contains('open')) renderS2();
+    });
+  });
+}
+
+// ── Open / close Stage 2 page ─────────────────────────────────────────
+function openStage2Page(){
+  // Close whatever is open
+  document.getElementById('login-overlay').classList.remove('show');
+  const dm = document.getElementById('hub-desktop-modal');
+  if(dm) dm.classList.remove('open');
+  // Show Stage 2 login
+  document.getElementById('s2-login').style.display='flex';
+  document.getElementById('s2-page').classList.remove('open');
+}
+
+function closeStage2Page(){
+  document.getElementById('s2-page').classList.remove('open');
+  document.getElementById('s2-login').style.display = 'none';
+  document.getElementById('hub-screens').classList.remove('show-sub','show-log');
+  document.getElementById('login-overlay').classList.add('show');
+}
+
+function showS2Login(){
+  document.getElementById('s2-login').style.display='flex';
+  document.getElementById('s2-page').classList.remove('open');
+}
+
+// ── Password prompt for Stage 2 ───────────────────────────────────────
+function promptS2Password(reviewer){
+  s2PendingReviewer = reviewer;
+  // Compare has no password — enter directly
+  if(reviewer === 's2compare'){
+    const dm = document.getElementById('hub-desktop-modal');
+    if(dm) dm.classList.remove('open');
+    enterS2AsReviewer('s2compare');
+    return;
+  }
+  const cfg = S2_REVIEWERS[reviewer];
+  const icon  = document.getElementById('pwd-icon');
+  const title = document.getElementById('pwd-title');
+  const input = document.getElementById('pwd-input');
+  const err   = document.getElementById('pwd-error');
+  const btn   = document.getElementById('pwd-submit-btn');
+  icon.textContent  = cfg.display;
+  icon.style.background = cfg.color;
+  title.textContent = 'Enter password for ' + cfg.display;
+  input.value = ''; err.textContent = '';
+  btn.style.background = cfg.color;
+  // Close desktop modal (same as Stage 1 promptPassword)
+  const dm = document.getElementById('hub-desktop-modal');
+  if(dm) dm.classList.remove('open');
+  window._s2LoginPending = true;
+  document.getElementById('pwd-overlay').classList.add('show');
+  setTimeout(()=>input.focus(), 120);
+}
+
+// Hook into submitPassword for s2 login
+const _s2OrigSubmit = submitPassword;
+submitPassword = function(){
+  if(window._s2LoginPending){
+    window._s2LoginPending = false;
+    const input = document.getElementById('pwd-input');
+    const err   = document.getElementById('pwd-error');
+    const entered = input.value.trim();
+    if(entered === S2_PASSWORDS[s2PendingReviewer]){
+      document.getElementById('pwd-overlay').classList.remove('show');
+      input.value=''; err.textContent='';
+      enterS2AsReviewer(s2PendingReviewer);
+    } else {
+      err.textContent = '✗ Incorrect password';
+      input.classList.add('shake');
+      input.value='';
+      setTimeout(()=>input.classList.remove('shake'),400);
+      input.focus();
+    }
+    return;
+  }
+  _s2OrigSubmit();
+};
+
+const _s2OrigCancel = cancelPassword;
+cancelPassword = function(){
+  window._s2LoginPending = false;
+  _s2OrigCancel();
+};
+
+function enterS2AsReviewer(reviewer){
+  s2CurrentReviewer = reviewer;
+  s2CompareMode = (reviewer === 's2compare');
+  // Hide login hub, show Stage 2 page (same as setReviewer for Stage 1)
+  document.getElementById('login-overlay').classList.remove('show');
+  document.getElementById('s2-login').style.display = 'none';
+  document.getElementById('s2-page').classList.add('open');
+  // Update who badge
+  const isCompare = s2CompareMode;
+  const cfg = isCompare ? {display:'Compare All', color:'#6D28D9'} : S2_REVIEWERS[reviewer];
+  document.getElementById('s2-wd').style.background = cfg.color;
+  document.getElementById('s2-who-lbl').textContent = cfg.display;
+  document.getElementById('s2-compare-btn').className = 's2-compare-btn' + (isCompare?' active':'');
+  buildS2Selector();
+  renderS2();
+  renderS2Stats();
+}
+
+// ── Activity navigation ───────────────────────────────────────────────
+function buildS2Selector(){
+  const sel = document.getElementById('s2-act-select');
+  sel.innerHTML = '';
+  ACTIVITIES_DATA.forEach((act,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i; opt.textContent=(i+1)+'. '+act.title_ar;
+    sel.appendChild(opt);
+  });
+  sel.value = s2CurrentActIdx;
+  document.getElementById('s2-prog').textContent = (s2CurrentActIdx+1)+' / '+ACTIVITIES_DATA.length;
+}
+
+function switchS2Activity(idx){
+  s2CurrentActIdx = parseInt(idx);
+  document.getElementById('s2-prog').textContent = (s2CurrentActIdx+1)+' / '+ACTIVITIES_DATA.length;
+  renderS2(); renderS2Stats();
+}
+
+function navS2(dir){
+  const n = ACTIVITIES_DATA.length;
+  s2CurrentActIdx = (s2CurrentActIdx + dir + n) % n;
+  document.getElementById('s2-act-select').value = s2CurrentActIdx;
+  document.getElementById('s2-prog').textContent = (s2CurrentActIdx+1)+' / '+ACTIVITIES_DATA.length;
+  renderS2(); renderS2Stats();
+}
+
+function toggleS2Compare(){
+  if(s2CurrentReviewer === 's2compare'){
+    // Already in compare — do nothing
+    return;
+  }
+  s2CompareMode = !s2CompareMode;
+  document.getElementById('s2-compare-btn').className='s2-compare-btn'+(s2CompareMode?' active':'');
+  renderS2();
+}
+
+// ── Main render ───────────────────────────────────────────────────────
+function renderS2(){
+  const act  = ACTIVITIES_DATA[s2CurrentActIdx];
+  const actId = act.id;
+  const advancedEvIds = (stage2Data[actId] && Object.keys(stage2Data[actId])) || [];
+  const content = document.getElementById('s2-content');
+
+  if(advancedEvIds.length === 0){
+    content.innerHTML = `
+      <div class="s2-empty">
+        <div class="s2-empty-icon">📋</div>
+        <div class="s2-empty-title">No evidences advanced yet</div>
+        <div class="s2-empty-sub">No evidences from <span style="font-family:Amiri,serif;font-size:16px">${act.title_ar}</span><br>have been advanced to Stage 2 yet.</div>
+      </div>`;
+    return;
+  }
+
+  // Get advanced evidences in original order
+  const advEvs = act.evidences.filter(ev => advancedEvIds.includes(ev.id));
+  const pfxMap = {quran:'Q', bukhari:'B', muslim:'M'};
+  const srcCounts = {quran:0, bukhari:0, muslim:0};
+
+  content.innerHTML = '';
+
+  // Group by source
+  ['quran','bukhari','muslim'].forEach(src=>{
+    const srcEvs = advEvs.filter(ev=>ev.src===src);
+    if(!srcEvs.length) return;
+    // Section header
+    const sh = document.createElement('div');
+    sh.style.cssText='display:flex;align-items:center;gap:10px;margin:16px 0 8px;direction:ltr';
+    const srcLabels={quran:{ar:'القرآن الكريم',en:'A) THE HOLY QURAN',color:'#1B5E20'},bukhari:{ar:'صحيح البخاري',en:'B) SAHIH AL-BUKHARI',color:'#0D47A1'},muslim:{ar:'صحيح مسلم',en:'C) SAHIH MUSLIM',color:'#4A148C'}};
+    const sl = srcLabels[src];
+    sh.innerHTML=`<div style="width:32px;height:32px;border-radius:50%;background:${sl.color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${pfxMap[src]}</div><div><div style="font-family:Amiri,serif;font-size:18px;color:${sl.color};direction:rtl">${sl.ar}</div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#94A3B8">${sl.en}</div></div><div style="flex:1;height:1px;background:linear-gradient(to right,#ddd,transparent)"></div>`;
+    content.appendChild(sh);
+
+    srcEvs.forEach((ev,i)=>{
+      srcCounts[src]++;
+      const pfx = pfxMap[src]+'-0'+(srcCounts[src]);
+      content.appendChild(buildS2Card(ev, pfx, actId));
+    });
+  });
+
+  document.getElementById('s2-cnt-total').textContent = advEvs.length;
+}
+
+function buildS2Card(ev, num, actId){
+  const wrap = document.createElement('div');
+  wrap.className='s2-card'; wrap.id='s2card-'+ev.id;
+
+  // Top bar
+  const top = document.createElement('div');
+  top.className='s2-card-top';
+  top.innerHTML=`<div class="s2-card-left"><span class="s2-cnum">${num}</span><div><div class="s2-ref-ar">${ev.loc_ar}</div><div class="s2-ref-en">${ev.loc_en}</div></div></div><div class="s2-card-right"><div class="s2-r-ind" id="s2ri-s2r1-${ev.id}"><div class="sdot"></div>S1</div><div class="s2-r-ind" id="s2ri-s2r2-${ev.id}"><div class="sdot"></div>S2</div><div class="s2-r-ind" id="s2ri-s2r3-${ev.id}"><div class="sdot"></div>S3</div><div class="s2-done-badge" id="s2done-${ev.id}">✅ Verified</div></div>`;
+  wrap.appendChild(top);
+
+  // Narrator (if exists)
+  if(ev.narr_ar){
+    const n=document.createElement('div');
+    n.style.cssText='padding:6px 14px;background:#F8FAFC;border-bottom:1px solid #F0F0F0;direction:rtl;font-family:Amiri,serif;font-size:14px;color:#555';
+    n.textContent=ev.narr_ar;
+    wrap.appendChild(n);
+  }
+
+  // Arabic text
+  const ar=document.createElement('div');
+  ar.className='s2-txt ar';
+  ar.innerHTML=`<div class="s2-txt-lbl">Arabic — النص العربي</div><div class="s2-txt-body">${ev.ar}</div>`;
+  wrap.appendChild(ar);
+
+  // English text
+  const en=document.createElement('div');
+  en.className='s2-txt en';
+  en.style.borderBottom='1px solid #F0F0F0';
+  en.innerHTML=`<div class="s2-txt-lbl">English — الترجمة</div><div class="s2-txt-body" style="font-family:Lato,sans-serif;font-size:13px;line-height:1.7">${ev.en}</div>`;
+  wrap.appendChild(en);
+
+  // Checklist or Compare
+  if(s2CompareMode || s2CurrentReviewer==='s2compare'){
+    wrap.appendChild(buildS2CompareBlock(ev, actId));
+  } else {
+    wrap.appendChild(buildS2Checklist(ev, actId));
+  }
+
+  updateS2CardState(ev.id, actId);
+  return wrap;
+}
+
+function buildS2Checklist(ev, actId){
+  const panel = document.createElement('div');
+  panel.className='s2-checklist'; panel.id='s2cl-'+ev.id;
+  panel.innerHTML='<div class="s2-checklist-title">VERIFICATION CHECKLIST</div>';
+
+  const myVotes = (s2Votes[s2CurrentReviewer]&&s2Votes[s2CurrentReviewer][actId]&&s2Votes[s2CurrentReviewer][actId][ev.id]) || {};
+
+  S2_CHECKS.forEach(chk=>{
+    const checked = myVotes[chk.key]===true;
+    const row=document.createElement('div');
+    row.className='s2-check-row'+(checked?' checked':'');
+    row.id='s2cr-'+ev.id+'-'+chk.key;
+    row.innerHTML=`<div class="s2-check-box">${checked?'✓':''}</div><span class="s2-check-label">${chk.label}</span>`;
+    row.onclick=()=>toggleS2Check(ev.id, actId, chk.key, !checked);
+    panel.appendChild(row);
+  });
+  return panel;
+}
+
+function buildS2CompareBlock(ev, actId){
+  const block=document.createElement('div');
+  block.className='s2-compare-grid'; block.id='s2cmp-'+ev.id;
+  renderS2CompareBlock(ev.id, actId, block);
+  return block;
+}
+
+function renderS2CompareBlock(evId, actId, block){
+  if(!block) block=document.getElementById('s2cmp-'+evId);
+  if(!block) return;
+  block.innerHTML='';
+  ['s2r1','s2r2','s2r3'].forEach(r=>{
+    const rv=S2_REVIEWERS[r];
+    const myV=(s2Votes[r]&&s2Votes[r][actId]&&s2Votes[r][actId][evId])||{};
+    const row=document.createElement('div');
+    row.className='s2-compare-row';
+    const checks=S2_CHECKS.map(chk=>{
+      const done=myV[chk.key]===true;
+      return `<span class="s2-mini-check${done?' done':''}">${done?'✓ ':''} ${chk.label}</span>`;
+    }).join('');
+    row.innerHTML=`<span class="s2-compare-name" style="color:${rv.color}">${rv.display}</span><div class="s2-compare-checks">${checks}</div>`;
+    block.appendChild(row);
+  });
+}
+
+function toggleS2Check(evId, actId, checkKey, newVal){
+  if(!s2CurrentReviewer||s2CurrentReviewer==='s2compare') return;
+  db.ref('v2/s2votes/'+s2CurrentReviewer+'/'+actId+'/'+evId+'/'+checkKey).set(newVal).then(()=>{
+    showToast(newVal?'✓ '+S2_CHECKS.find(c=>c.key===checkKey).label:'Unchecked');
+  });
+}
+
+function updateS2CardState(evId, actId){
+  const card=document.getElementById('s2card-'+evId); if(!card) return;
+
+  // Update reviewer indicators
+  ['s2r1','s2r2','s2r3'].forEach(r=>{
+    const el=document.getElementById('s2ri-'+r+'-'+evId); if(!el) return;
+    const rv=S2_REVIEWERS[r];
+    const myV=(s2Votes[r]&&s2Votes[r][actId]&&s2Votes[r][actId][evId])||{};
+    const allDone=S2_CHECKS.every(c=>myV[c.key]===true);
+    const anyDone=S2_CHECKS.some(c=>myV[c.key]===true);
+    if(allDone){el.className='s2-r-ind '+rv.labelCls+'v';el.title=rv.display+': All verified';}
+    else if(anyDone){el.className='s2-r-ind';el.style.borderColor=rv.color;el.style.color=rv.color;el.title=rv.display+': Partial';}
+    else{el.className='s2-r-ind';el.style.borderColor='';el.style.color='';el.title=rv.display+': Not started';}
+  });
+
+  // Check if all 3 reviewers completed all checks
+  const allComplete=['s2r1','s2r2','s2r3'].every(r=>{
+    const myV=(s2Votes[r]&&s2Votes[r][actId]&&s2Votes[r][actId][evId])||{};
+    return S2_CHECKS.every(c=>myV[c.key]===true);
+  });
+  card.className='s2-card'+(allComplete?' all-checked':'');
+  const doneBadge=document.getElementById('s2done-'+evId);
+  if(doneBadge) doneBadge.style.display=allComplete?'inline-flex':'none';
+
+  // Update checklist row states if in reviewer mode
+  if(!s2CompareMode && s2CurrentReviewer!=='s2compare'){
+    const myV=(s2Votes[s2CurrentReviewer]&&s2Votes[s2CurrentReviewer][actId]&&s2Votes[s2CurrentReviewer][actId][evId])||{};
+    S2_CHECKS.forEach(chk=>{
+      const row=document.getElementById('s2cr-'+evId+'-'+chk.key); if(!row) return;
+      const checked=myV[chk.key]===true;
+      row.className='s2-check-row'+(checked?' checked':'');
+      row.querySelector('.s2-check-box').textContent=checked?'✓':'';
+      row.onclick=()=>toggleS2Check(evId, actId, chk.key, !checked);
+    });
+  }
+  // Update compare block if in compare mode
+  if(s2CompareMode || s2CurrentReviewer==='s2compare'){
+    renderS2CompareBlock(evId, actId, null);
+  }
+}
+
+function renderS2Stats(){
+  const act=ACTIVITIES_DATA[s2CurrentActIdx];
+  const actId=act.id;
+  const advIds=Object.keys(stage2Data[actId]||{});
+  const countFor=(r)=>advIds.filter(evId=>{
+    const myV=(s2Votes[r]&&s2Votes[r][actId]&&s2Votes[r][actId][evId])||{};
+    return S2_CHECKS.some(c=>myV[c.key]);
+  }).length;
+  const countAll=advIds.filter(evId=>{
+    return ['s2r1','s2r2','s2r3'].every(r=>{
+      const myV=(s2Votes[r]&&s2Votes[r][actId]&&s2Votes[r][actId][evId])||{};
+      return S2_CHECKS.every(c=>myV[c.key]===true);
+    });
+  }).length;
+  document.getElementById('s2-cnt-total').textContent=advIds.length;
+  document.getElementById('s2-cnt-r1').textContent=countFor('s2r1');
+  document.getElementById('s2-cnt-r2').textContent=countFor('s2r2');
+  document.getElementById('s2-cnt-r3').textContent=countFor('s2r3');
+  document.getElementById('s2-cnt-all').textContent=countAll;
+}
+
+// Hook into Firebase listeners
+const _origSetup = setupFirebaseListeners;
+setupFirebaseListeners = function(){
+  _origSetup();
+  setupStage2Listeners();
+};
+
 buildSelector();
 switchActivity(0);
 setupFirebaseListeners();
 // Give Firebase 6s to connect before forcing the login screen open
 setTimeout(hideLoding, 6000);
 </script>
+
+<!-- ════ STAGE 2 REVIEW PAGE ════ -->
+<div class="s2-page" id="s2-page">
+
+  <!-- Header -->
+  <div class="s2-header">
+    <div class="s2-header-top">
+      <div>
+        <div class="s2-header-title">مراجعة الأدلة — المرحلة الثانية</div>
+        <div class="s2-header-sub">STAGE 2 REVIEW</div>
+      </div>
+      <button class="s2-exit-btn" onclick="closeStage2Page()">✕ Exit Stage 2</button>
+    </div>
+    <div class="s2-who-bar">
+      <div class="s2-who-badge" id="s2-who-badge">
+        <div class="s2-wd" id="s2-wd"></div>
+        <span id="s2-who-lbl">—</span>
+        <span class="s2-switch" onclick="showS2Login()">Switch ↩</span>
+      </div>
+      <div class="s2-who-badge" style="background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.3)">
+        <div class="s2-wd" style="background:#4ADE80"></div>
+        <span style="color:#4ADE80;font-size:10px" id="s2-fb-lbl">Firebase Connected</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stat bar -->
+  <div class="s2-stat-bar" id="s2-stat-bar">
+    <span style="font-size:11px;font-weight:700;color:#94A3B8">EVIDENCES</span>
+    <span class="s2-pill" style="border-color:#94A3B8;color:#94A3B8"><span id="s2-cnt-total">0</span></span>
+    <span class="s2-pill p1">S2-R1 <span class="n" id="s2-cnt-r1">0</span></span>
+    <span class="s2-pill p2">S2-R2 <span class="n" id="s2-cnt-r2">0</span></span>
+    <span class="s2-pill p3">S2-R3 <span class="n" id="s2-cnt-r3">0</span></span>
+    <span class="s2-pill pall">All ✓ <span class="n" id="s2-cnt-all">0</span></span>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="s2-toolbar">
+    <span style="font-size:10px;font-weight:700;letter-spacing:1px;color:#94A3B8;white-space:nowrap">ACTIVITY</span>
+    <select class="s2-act-select" id="s2-act-select" onchange="switchS2Activity(this.value)"></select>
+    <button class="s2-nav-btn" onclick="navS2(-1)">← Prev</button>
+    <button class="s2-nav-btn" onclick="navS2(1)">Next →</button>
+    <span class="s2-prog" id="s2-prog">1 / 4</span>
+    <button class="s2-compare-btn" id="s2-compare-btn" onclick="toggleS2Compare()">⚖ Compare</button>
+  </div>
+
+  <!-- Main content -->
+  <div class="s2-content" id="s2-content"></div>
+
+</div>
+
+<!-- S2 Login Overlay -->
+<div class="login-overlay" id="s2-login" style="display:none;background:linear-gradient(160deg,#0a0a2e 0%,#1a237e 55%,#4a0072 100%)">
+  <div class="hub-phone">
+    <div class="hub-screens">
+      <div class="hub-screen hub-home" style="transform:translateX(0)">
+
+        <div class="hub-header">
+          <h1>المرحلة الثانية</h1>
+          <div class="sub">STAGE 2 REVIEW</div>
+          <div class="hub-status">
+            <span class="hub-status-dot on"></span>
+            <span>Stage 2 Active</span>
+          </div>
+        </div>
+
+        <div class="hub-cards" style="padding:0 14px 16px;display:flex;flex-direction:column;gap:9px">
+
+          <button class="reviewer-btn" style="border-color:#7C3AED;color:#7C3AED;background:#fff" onclick="promptS2Password('s2r1')">
+            <div class="r-avatar" style="background:#F5F3FF;color:#7C3AED">S1</div>
+            <div class="r-info">
+              <span class="r-name" style="color:#7C3AED">Stage 2 — Reviewer 1</span>
+              <span class="r-role">المراجع الأول — المرحلة الثانية</span>
+            </div>
+          </button>
+
+          <button class="reviewer-btn" style="border-color:#DB2777;color:#DB2777;background:#fff" onclick="promptS2Password('s2r2')">
+            <div class="r-avatar" style="background:#FDF2F8;color:#DB2777">S2</div>
+            <div class="r-info">
+              <span class="r-name" style="color:#DB2777">Stage 2 — Reviewer 2</span>
+              <span class="r-role">المراجع الثاني — المرحلة الثانية</span>
+            </div>
+          </button>
+
+          <button class="reviewer-btn" style="border-color:#0369A1;color:#0369A1;background:#fff" onclick="promptS2Password('s2r3')">
+            <div class="r-avatar" style="background:#EFF6FF;color:#0369A1">S3</div>
+            <div class="r-info">
+              <span class="r-name" style="color:#0369A1">Stage 2 — Reviewer 3</span>
+              <span class="r-role">المراجع الثالث — المرحلة الثانية</span>
+            </div>
+          </button>
+
+          <button class="reviewer-btn compare-btn" onclick="promptS2Password('s2compare')">
+            <div class="r-avatar">⚖</div>
+            <div class="r-info">
+              <span class="r-name">Compare All Results</span>
+              <span class="r-role">VIEW ALL CHECKS — مقارنة المرحلة الثانية</span>
+            </div>
+          </button>
+
+          <button class="reviewer-btn" style="border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);background:rgba(255,255,255,.08)" onclick="closeStage2Page()">
+            <div class="r-avatar" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)">←</div>
+            <div class="r-info">
+              <span class="r-name" style="color:rgba(255,255,255,.8)">Back to Main Hub</span>
+              <span class="r-role" style="color:rgba(255,255,255,.45)">العودة إلى الصفحة الرئيسية</span>
+            </div>
+          </button>
+
+        </div>
+
+        <div class="hub-sub-footer">
+          <div class="login-sync online">🟢 Firebase connected — real-time sync active</div>
+          <div class="login-note">Stage 2 votes saved to Firebase in real time.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
